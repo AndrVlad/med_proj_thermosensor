@@ -1,0 +1,17 @@
+../Drivers/W25Q/w25q_spi.c:36:6:SPI1_Send	16	static
+../Drivers/W25Q/w25q_spi.c:42:6:SPI1_Recv	16	static
+../Drivers/W25Q/w25q_spi.c:47:6:W25_Reset	8	static
+../Drivers/W25Q/w25q_spi.c:56:6:W25_Read_Info	32	static
+../Drivers/W25Q/w25q_spi.c:131:6:W25_Write_Enable	8	static
+../Drivers/W25Q/w25q_spi.c:139:6:W25_Write_Disable	8	static
+../Drivers/W25Q/w25q_spi.c:147:6:W25_Set_Block_Protect	16	static
+../Drivers/W25Q/w25q_spi.c:160:6:W25_Wait_Write_End	8	static
+../Drivers/W25Q/w25q_spi.c:175:6:W25_Erase_Sector	16	static
+../Drivers/W25Q/w25q_spi.c:204:6:W25_Erase_Block	16	static
+../Drivers/W25Q/w25q_spi.c:232:6:W25_Erase_Chip	8	static
+../Drivers/W25Q/w25q_spi.c:245:6:W25_Write_Data	24	static
+../Drivers/W25Q/w25q_spi.c:274:6:W25_Write_Page	24	static
+../Drivers/W25Q/w25q_spi.c:309:6:W25_Read_Data	24	static
+../Drivers/W25Q/w25q_spi.c:321:11:W25_Read_ID	16	static
+../Drivers/W25Q/w25q_spi.c:332:6:W25_Ini	24	static
+../Drivers/W25Q/w25q_spi.c:423:6:W25_Read_Page	24	static

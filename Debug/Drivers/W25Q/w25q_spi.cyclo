@@ -1,0 +1,17 @@
+w25q_spi.c:36:6:SPI1_Send	1
+w25q_spi.c:42:6:SPI1_Recv	1
+w25q_spi.c:47:6:W25_Reset	1
+w25q_spi.c:56:6:W25_Read_Info	11
+w25q_spi.c:131:6:W25_Write_Enable	1
+w25q_spi.c:139:6:W25_Write_Disable	1
+w25q_spi.c:147:6:W25_Set_Block_Protect	1
+w25q_spi.c:160:6:W25_Wait_Write_End	2
+w25q_spi.c:175:6:W25_Erase_Sector	2
+w25q_spi.c:204:6:W25_Erase_Block	2
+w25q_spi.c:232:6:W25_Erase_Chip	1
+w25q_spi.c:245:6:W25_Write_Data	2
+w25q_spi.c:274:6:W25_Write_Page	4
+w25q_spi.c:309:6:W25_Read_Data	1
+w25q_spi.c:321:11:W25_Read_ID	1
+w25q_spi.c:332:6:W25_Ini	14
+w25q_spi.c:423:6:W25_Read_Page	4
