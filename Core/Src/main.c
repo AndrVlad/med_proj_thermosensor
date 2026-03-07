@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "w25q_spi.h"
+#include "SPI_connection.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -114,6 +115,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3 | GPIO_PIN_4, GPIO_PIN_SET);
   /*reset mem*/
+  initSPIConnection();
   W25_Ini(0);
 
   HAL_TIM_Base_Start(&htim3); //start timer for ADC
@@ -125,6 +127,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+	  if (spi_rx_complete) {
+		  spi_rx_complete = false;
+	  }
 
     HAL_UART_Receive(&huart1,(uint8_t*)dt1,1,0x10);  //wait for cmd
     //commands

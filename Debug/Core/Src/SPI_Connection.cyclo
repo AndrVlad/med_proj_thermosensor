@@ -1,0 +1,4 @@
+SPI_Connection.c:19:6:initBuffer	2
+SPI_Connection.c:25:6:initSPIConnection	1
+SPI_Connection.c:32:6:switchBuffer	2
+SPI_Connection.c:42:6:HAL_SPI_TxRxCpltCallback	3

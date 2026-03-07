@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -67,7 +67,7 @@ void Error_Handler(void);
 #define FLASH_CS_GPIO_Port_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
-
+extern SPI_HandleTypeDef hspi2;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
