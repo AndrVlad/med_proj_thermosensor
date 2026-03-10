@@ -65,6 +65,9 @@ void Error_Handler(void);
 #define FLASH_nRST_GPIO_Port GPIOA
 #define FLASH_CS_GPIO_Port_Pin GPIO_PIN_4
 #define FLASH_CS_GPIO_Port_GPIO_Port GPIOA
+#define SPI2_CS_Pin GPIO_PIN_12
+#define SPI2_CS_GPIO_Port GPIOB
+#define SPI2_CS_EXTI_IRQn EXTI15_10_IRQn
 
 /* USER CODE BEGIN Private defines */
 extern SPI_HandleTypeDef hspi2;
