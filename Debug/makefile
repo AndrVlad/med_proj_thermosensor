@@ -53,6 +53,12 @@ default.size.stdout \
 OBJDUMP_LIST += \
 termosensor.list \
 
+OBJCOPY_HEX += \
+termosensor.hex \
+
+OBJCOPY_BIN += \
+termosensor.bin \
+
 
 # All Target
 all: main-build
@@ -61,8 +67,8 @@ all: main-build
 main-build: termosensor.elf secondary-outputs
 
 # Tool invocations
-termosensor.elf termosensor.map: $(OBJS) $(USER_OBJS) C:\Users\vlado\STM32CubeIDE\workspace_1.12.0\termosensor\STM32F103CBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "termosensor.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\vlado\STM32CubeIDE\workspace_1.12.0\termosensor\STM32F103CBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="termosensor.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+termosensor.elf termosensor.map: $(OBJS) $(USER_OBJS) C:\Users\Admin\Documents\GitHub\med_proj_thermosensor\STM32F103CBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "termosensor.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Admin\Documents\GitHub\med_proj_thermosensor\STM32F103CBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="termosensor.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -76,12 +82,22 @@ termosensor.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+termosensor.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "termosensor.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
+termosensor.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "termosensor.bin"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
-	-$(RM) default.size.stdout termosensor.elf termosensor.list termosensor.map
+	-$(RM) default.size.stdout termosensor.bin termosensor.elf termosensor.hex termosensor.list termosensor.map
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX) $(OBJCOPY_BIN)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'

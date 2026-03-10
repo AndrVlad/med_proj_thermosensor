@@ -37,13 +37,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  000199bc  00000000  00000000  00034708  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   00013eab  00000000  00000000  0004e0c4  2**0
+ 17 .debug_line   0001291d  00000000  00000000  0004e0c4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000919a9  00000000  00000000  00061f6f  2**0
+ 18 .debug_str    000919a6  00000000  00000000  000609e1  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000050  00000000  00000000  000f3918  2**0
+ 19 .comment      00000050  00000000  00000000  000f2387  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00004868  00000000  00000000  000f3968  2**2
+ 20 .debug_frame  00004868  00000000  00000000  000f23d8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1050,44 +1050,43 @@ static void MX_SPI2_Init(void)
  800079e:	4b0e      	ldr	r3, [pc, #56]	; (80007d8 <MX_SPI2_Init+0x5c>)
  80007a0:	2200      	movs	r2, #0
  80007a2:	615a      	str	r2, [r3, #20]
-  hspi2.Init.NSS = SPI_NSS_HARD_INPUT;
+  hspi2.Init.NSS = SPI_NSS_SOFT;
  80007a4:	4b0c      	ldr	r3, [pc, #48]	; (80007d8 <MX_SPI2_Init+0x5c>)
- 80007a6:	2200      	movs	r2, #0
- 80007a8:	619a      	str	r2, [r3, #24]
+ 80007a6:	f44f 7200 	mov.w	r2, #512	; 0x200
+ 80007aa:	619a      	str	r2, [r3, #24]
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
- 80007aa:	4b0b      	ldr	r3, [pc, #44]	; (80007d8 <MX_SPI2_Init+0x5c>)
- 80007ac:	2200      	movs	r2, #0
- 80007ae:	621a      	str	r2, [r3, #32]
+ 80007ac:	4b0a      	ldr	r3, [pc, #40]	; (80007d8 <MX_SPI2_Init+0x5c>)
+ 80007ae:	2200      	movs	r2, #0
+ 80007b0:	621a      	str	r2, [r3, #32]
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
- 80007b0:	4b09      	ldr	r3, [pc, #36]	; (80007d8 <MX_SPI2_Init+0x5c>)
- 80007b2:	2200      	movs	r2, #0
- 80007b4:	625a      	str	r2, [r3, #36]	; 0x24
+ 80007b2:	4b09      	ldr	r3, [pc, #36]	; (80007d8 <MX_SPI2_Init+0x5c>)
+ 80007b4:	2200      	movs	r2, #0
+ 80007b6:	625a      	str	r2, [r3, #36]	; 0x24
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
- 80007b6:	4b08      	ldr	r3, [pc, #32]	; (80007d8 <MX_SPI2_Init+0x5c>)
- 80007b8:	2200      	movs	r2, #0
- 80007ba:	629a      	str	r2, [r3, #40]	; 0x28
+ 80007b8:	4b07      	ldr	r3, [pc, #28]	; (80007d8 <MX_SPI2_Init+0x5c>)
+ 80007ba:	2200      	movs	r2, #0
+ 80007bc:	629a      	str	r2, [r3, #40]	; 0x28
   hspi2.Init.CRCPolynomial = 10;
- 80007bc:	4b06      	ldr	r3, [pc, #24]	; (80007d8 <MX_SPI2_Init+0x5c>)
- 80007be:	220a      	movs	r2, #10
- 80007c0:	62da      	str	r2, [r3, #44]	; 0x2c
+ 80007be:	4b06      	ldr	r3, [pc, #24]	; (80007d8 <MX_SPI2_Init+0x5c>)
+ 80007c0:	220a      	movs	r2, #10
+ 80007c2:	62da      	str	r2, [r3, #44]	; 0x2c
   if (HAL_SPI_Init(&hspi2) != HAL_OK)
- 80007c2:	4805      	ldr	r0, [pc, #20]	; (80007d8 <MX_SPI2_Init+0x5c>)
- 80007c4:	f002 f954 	bl	8002a70 <HAL_SPI_Init>
- 80007c8:	4603      	mov	r3, r0
- 80007ca:	2b00      	cmp	r3, #0
- 80007cc:	d001      	beq.n	80007d2 <MX_SPI2_Init+0x56>
+ 80007c4:	4804      	ldr	r0, [pc, #16]	; (80007d8 <MX_SPI2_Init+0x5c>)
+ 80007c6:	f002 f953 	bl	8002a70 <HAL_SPI_Init>
+ 80007ca:	4603      	mov	r3, r0
+ 80007cc:	2b00      	cmp	r3, #0
+ 80007ce:	d001      	beq.n	80007d4 <MX_SPI2_Init+0x58>
   {
     Error_Handler();
- 80007ce:	f000 f8c9 	bl	8000964 <Error_Handler>
+ 80007d0:	f000 f8c8 	bl	8000964 <Error_Handler>
   }
   /* USER CODE BEGIN SPI2_Init 2 */
 
   /* USER CODE END SPI2_Init 2 */
 
 }
- 80007d2:	bf00      	nop
- 80007d4:	bd80      	pop	{r7, pc}
- 80007d6:	bf00      	nop
+ 80007d4:	bf00      	nop
+ 80007d6:	bd80      	pop	{r7, pc}
  80007d8:	20000438 	.word	0x20000438
  80007dc:	40003800 	.word	0x40003800
 
@@ -1664,8 +1663,8 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
  8000b10:	f003 0308 	and.w	r3, r3, #8
  8000b14:	60bb      	str	r3, [r7, #8]
  8000b16:	68bb      	ldr	r3, [r7, #8]
-    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_15;
- 8000b18:	f44f 4330 	mov.w	r3, #45056	; 0xb000
+    GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_15;
+ 8000b18:	f44f 4320 	mov.w	r3, #40960	; 0xa000
  8000b1c:	61bb      	str	r3, [r7, #24]
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
  8000b1e:	2300      	movs	r3, #0
