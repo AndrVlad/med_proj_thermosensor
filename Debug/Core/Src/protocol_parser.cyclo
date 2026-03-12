@@ -1,0 +1,4 @@
+protocol_parser.c:80:6:parser	10
+protocol_parser.c:123:6:checkCRC32	2
+protocol_parser.c:140:10:calculateCRC32	2
+protocol_parser.c:149:10:sensorSelfCheck	1

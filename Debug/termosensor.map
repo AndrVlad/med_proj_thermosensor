@@ -272,6 +272,96 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x16 ./Core/Src/main.o
  .debug_macro   0x0000000000000000      0x145 ./Core/Src/main.o
  .debug_macro   0x0000000000000000       0x22 ./Core/Src/main.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .group         0x0000000000000000        0xc ./Core/Src/protocol_parser.o
+ .text          0x0000000000000000        0x0 ./Core/Src/protocol_parser.o
+ .data          0x0000000000000000        0x0 ./Core/Src/protocol_parser.o
+ .bss           0x0000000000000000        0x0 ./Core/Src/protocol_parser.o
+ .data.response_frame
+                0x0000000000000000        0xa ./Core/Src/protocol_parser.o
+ .bss.safe_command_frame
+                0x0000000000000000        0xa ./Core/Src/protocol_parser.o
+ .bss.data_frame
+                0x0000000000000000      0x108 ./Core/Src/protocol_parser.o
+ .bss.response_ready
+                0x0000000000000000        0x1 ./Core/Src/protocol_parser.o
+ .bss.meas_request_cnt
+                0x0000000000000000        0x2 ./Core/Src/protocol_parser.o
+ .data.sensor_state
+                0x0000000000000000        0x2 ./Core/Src/protocol_parser.o
+ .data.measurement_state
+                0x0000000000000000        0x2 ./Core/Src/protocol_parser.o
+ .rodata.crc32_table
+                0x0000000000000000      0x400 ./Core/Src/protocol_parser.o
+ .text.parser   0x0000000000000000       0xe8 ./Core/Src/protocol_parser.o
+ .text.checkCRC32
+                0x0000000000000000       0x54 ./Core/Src/protocol_parser.o
+ .text.calculateCRC32
+                0x0000000000000000       0x58 ./Core/Src/protocol_parser.o
+ .text.sensorSelfCheck
+                0x0000000000000000        0xe ./Core/Src/protocol_parser.o
+ .debug_info    0x0000000000000000      0x310 ./Core/Src/protocol_parser.o
+ .debug_abbrev  0x0000000000000000      0x180 ./Core/Src/protocol_parser.o
+ .debug_aranges
+                0x0000000000000000       0x38 ./Core/Src/protocol_parser.o
+ .debug_ranges  0x0000000000000000       0x28 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000      0x158 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000      0xa6c ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x22 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x8e ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x51 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000      0x103 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x6a ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000      0x1df ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x22 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x52 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x18 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x3c ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x34 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000      0x174 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x16 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x43 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x34 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x10 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x58 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x71 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x1c ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000      0x12a ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000      0x341 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x10 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x35 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x20 ./Core/Src/protocol_parser.o
+ .debug_macro   0x0000000000000000       0x4c ./Core/Src/protocol_parser.o
+ .debug_line    0x0000000000000000      0x83f ./Core/Src/protocol_parser.o
+ .debug_str     0x0000000000000000     0x6fe0 ./Core/Src/protocol_parser.o
+ .comment       0x0000000000000000       0x51 ./Core/Src/protocol_parser.o
+ .debug_frame   0x0000000000000000       0xa0 ./Core/Src/protocol_parser.o
+ .ARM.attributes
+                0x0000000000000000       0x2d ./Core/Src/protocol_parser.o
  .group         0x0000000000000000        0xc ./Core/Src/stm32f1xx_hal_msp.o
  .group         0x0000000000000000        0xc ./Core/Src/stm32f1xx_hal_msp.o
  .group         0x0000000000000000        0xc ./Core/Src/stm32f1xx_hal_msp.o
@@ -3320,6 +3410,7 @@ LOAD c:/program files/stmicroelectronics/stm32cubeide_1.12.0/stm32cubeide/plugin
 LOAD c:/program files/stmicroelectronics/stm32cubeide_1.12.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.10.3-2021.10.win32_1.0.200.202301161003/tools/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp/crt0.o
 LOAD ./Core/Src/SPI_Connection.o
 LOAD ./Core/Src/main.o
+LOAD ./Core/Src/protocol_parser.o
 LOAD ./Core/Src/stm32f1xx_hal_msp.o
 LOAD ./Core/Src/stm32f1xx_it.o
 LOAD ./Core/Src/syscalls.o
