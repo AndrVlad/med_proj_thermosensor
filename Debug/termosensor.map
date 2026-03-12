@@ -301,7 +301,7 @@ Discarded input sections
  .text          0x0000000000000000        0x0 ./Core/Src/protocol_parser.o
  .data          0x0000000000000000        0x0 ./Core/Src/protocol_parser.o
  .bss           0x0000000000000000        0x0 ./Core/Src/protocol_parser.o
- .data.response_frame
+ .data.response_frame_proto
                 0x0000000000000000        0xa ./Core/Src/protocol_parser.o
  .bss.safe_command_frame
                 0x0000000000000000        0xa ./Core/Src/protocol_parser.o
@@ -357,7 +357,7 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x20 ./Core/Src/protocol_parser.o
  .debug_macro   0x0000000000000000       0x4c ./Core/Src/protocol_parser.o
  .debug_line    0x0000000000000000      0x83f ./Core/Src/protocol_parser.o
- .debug_str     0x0000000000000000     0x6fe0 ./Core/Src/protocol_parser.o
+ .debug_str     0x0000000000000000     0x6fe6 ./Core/Src/protocol_parser.o
  .comment       0x0000000000000000       0x51 ./Core/Src/protocol_parser.o
  .debug_frame   0x0000000000000000       0xa0 ./Core/Src/protocol_parser.o
  .ARM.attributes

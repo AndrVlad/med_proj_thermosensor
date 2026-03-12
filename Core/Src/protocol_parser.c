@@ -11,7 +11,7 @@
 
 /* раздел объявления переменных */
 
-uint8_t response_frame[CONTROL_FRAME_LEN] = { 0xFA, 0xAF, 0, 0, 0xFF,		// буфер кадра ответа
+uint8_t response_frame_proto[CONTROL_FRAME_LEN] = { 0xFA, 0xAF, 0, 0, 0xFF,		// буфер кадра ответа
 												0x0D, 0, 0, 0, 0};
 uint8_t safe_command_frame[CONTROL_FRAME_LEN] = {0};					// резервный буфер кадра полученной команды
 
