@@ -1,5 +1,5 @@
-../Core/Src/SPI_Connection.c:23:6:HAL_GPIO_EXTI_Callback	16	static
-../Core/Src/SPI_Connection.c:33:6:initBuffer	24	static
-../Core/Src/SPI_Connection.c:38:6:initSPIConnection	8	static
-../Core/Src/SPI_Connection.c:46:6:switchBuffer	16	static
-../Core/Src/SPI_Connection.c:56:6:HAL_SPI_TxRxCpltCallback	16	static
+../Core/Src/SPI_Connection.c:22:6:HAL_GPIO_EXTI_Callback	16	static
+../Core/Src/SPI_Connection.c:32:6:fillBuffer	24	static
+../Core/Src/SPI_Connection.c:37:6:initSPIConnection	8	static
+../Core/Src/SPI_Connection.c:43:6:switchBuffer	16	static
+../Core/Src/SPI_Connection.c:53:6:HAL_SPI_TxRxCpltCallback	16	static

@@ -130,8 +130,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
 	  if (spi_rx_complete) {
+		  //parser();
 		  spi_rx_complete = false;
 	  }
 
