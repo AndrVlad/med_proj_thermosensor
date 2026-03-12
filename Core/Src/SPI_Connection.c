@@ -13,7 +13,7 @@ bool spi_state;
 //uint8_t response_frame[264] = {0xB};
 //uint8_t dummy_frame[264] = {0xA};
 uint8_t response_frame[2] = {0x2, 0x2};
-uint8_t dummy_frame[2] = {0x1, 0x1};
+uint8_t dummy_frame[2] = {0xA,0xA};
 uint8_t *spi_tx_ptr, *spi_rx_ptr;
 uint8_t trash[264] = {0};
 bool cs_selected = false;
@@ -23,23 +23,23 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         // Мастер опустил CS - начинаем подготовку
         if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET) {
             // Запускаем прием/передачу
-        	HAL_SPI_TransmitReceive_IT(&hspi2, spi_tx_ptr, spi_rx_ptr, FRAME_LEN);
+        	HAL_SPI_TransmitReceive_IT(&hspi2, spi_tx_ptr, spi_rx_ptr, 2);
         	cs_selected = true;
     }
 }
 
 void switchBuffer(bool spi_state);
 void initBuffer() {
-	for(int i = 0; i < FRAME_LEN; i++) {
+	for(int i = 0; i < 2; i++) {
 		dummy_frame[i] = 0xA;
-		response_frame[i] = 0xB;
+		//response_frame[i] = 0xB;
 	}
 }
 void initSPIConnection() {
 	spi_state = SPI_MODE_RX;
 	switchBuffer(spi_state);
 	//HAL_SPI_TransmitReceive_IT(&hspi2, spi_tx_ptr, spi_rx_ptr, FRAME_LEN);
-	//initBuffer();
+	initBuffer();
 };
 
 void switchBuffer(bool spi_state) {
@@ -58,13 +58,15 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
     {
         if (spi_state == SPI_MODE_TX) {
         	spi_state = SPI_MODE_RX;
-        } else {
+        } else
+        {
         	spi_state = SPI_MODE_TX;
         	spi_rx_complete = true;
         }
         memcpy(trash,spi_rx_ptr,2);
         memcpy(trash,spi_tx_ptr,2);
         switchBuffer(spi_state);
+        initBuffer();
         //HAL_SPI_TransmitReceive_IT(&hspi2, spi_tx_ptr, spi_rx_ptr, FRAME_LEN);
     }
 }

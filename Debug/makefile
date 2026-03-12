@@ -67,8 +67,8 @@ all: main-build
 main-build: termosensor.elf secondary-outputs
 
 # Tool invocations
-termosensor.elf termosensor.map: $(OBJS) $(USER_OBJS) C:\Users\Admin\Documents\GitHub\med_proj_thermosensor\STM32F103CBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "termosensor.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Admin\Documents\GitHub\med_proj_thermosensor\STM32F103CBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="termosensor.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+termosensor.elf termosensor.map: $(OBJS) $(USER_OBJS) C:\Users\vlado\STM32CubeIDE\workspace_1.12.0\termosensor\STM32F103CBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "termosensor.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\vlado\STM32CubeIDE\workspace_1.12.0\termosensor\STM32F103CBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="termosensor.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
