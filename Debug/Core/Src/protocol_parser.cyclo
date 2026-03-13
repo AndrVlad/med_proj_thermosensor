@@ -1,4 +1,7 @@
-protocol_parser.c:80:6:parser	10
-protocol_parser.c:123:6:checkCRC32	2
-protocol_parser.c:140:10:calculateCRC32	2
-protocol_parser.c:149:10:sensorSelfCheck	1
+protocol_parser.c:78:6:setFSMProtocolState	1
+protocol_parser.c:82:6:fillResponseFrame	1
+protocol_parser.c:87:6:sendPreviousResponse	1
+protocol_parser.c:91:6:parserFSM	38
+protocol_parser.c:242:6:checkCRC32	2
+protocol_parser.c:259:10:calculateCRC32	2
+protocol_parser.c:267:10:sensorSelfCheck	1

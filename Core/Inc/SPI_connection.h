@@ -18,6 +18,7 @@
 #define FRAME_LEN 264
 
 extern bool spi_rx_complete;
+extern uint8_t safe_response_frame[264], new_response_frame[264];
 
 void initSPIConnection();
 

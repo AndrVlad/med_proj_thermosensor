@@ -25,6 +25,7 @@
 #include <string.h>
 #include "w25q_spi.h"
 #include "SPI_connection.h"
+#include "protocol_parser.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,6 +61,7 @@ extern volatile uint16_t ADC_data;
 char need_save = 0; // 0-idle, 1-save data
 volatile uint16_t buf_ptr = 0, page_ptr = 0;
 uint8_t res_buf[256] = {0};
+uint8_t dt1[10];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,15 +73,32 @@ static void MX_ADC1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
-
+void sensorInit();
+void sendInitCTRL();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint8_t dt1[10];
 
-
-
+/* Инициализация датчика при его подключении */
+void sensorInit() {
+	// инициализация флеш-памяти
+	W25_Ini(0);
+	// инициализация SPI-соединения
+	initSPIConnection();
+	// отправка сигнала на CTRL для уведомления мастера о подключении датчика
+	sendInitCTRL();
+	// установка внутреннего состояния FSM протокола
+	setFSMProtocolState(CONNECTED_STATE);
+}
+/* Формирует сигнал CTRL для уведомления мастера о подключении датчика */
+void sendInitCTRL() {
+	return;
+}
+/* Формирует сигнал CTRL для уведомления мастера о получении команды */
+void sendRxCompleteCTRL() {
+	return;
+}
 /* USER CODE END 0 */
 
 /**
@@ -117,9 +136,9 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3 | GPIO_PIN_4, GPIO_PIN_SET);
-  /*reset mem*/
-  initSPIConnection();
-  W25_Ini(0);
+
+  // инициализация датчика
+  sensorInit();
 
   HAL_TIM_Base_Start(&htim3); //start timer for ADC
   HAL_ADC_Start_IT(&hadc1);
@@ -131,6 +150,8 @@ int main(void)
   while (1)
   {
 	  if (spi_rx_complete) {
+		  // отправка сигнала на CTRL для уведомления мастера о получении команды
+		  sendRxCompleteCTRL();
 		  //parser();
 		  spi_rx_complete = false;
 	  }

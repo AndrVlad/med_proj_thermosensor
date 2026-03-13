@@ -8,6 +8,14 @@
 #ifndef INC_PROTOCOL_PARSER_H_
 #define INC_PROTOCOL_PARSER_H_
 
+enum FSM_States {
+	CONNECTED_STATE,
+	READY_STATE,
+	MEASUREMENT_STATE,
+	EXCHANGE_STATE,
+	MEASUREMENT_EXCHANGE_STATE
+};
+
 void parser(uint8_t* command_frame);
 // открыто здесь для тестов
 bool checkCRC32(uint8_t* command_frame, uint16_t length);
@@ -15,5 +23,7 @@ bool checkCRC32(uint8_t* command_frame, uint16_t length);
 uint32_t calculateCRC32(uint8_t* arg,uint16_t length);
 
 uint16_t sensorSelfCheck();
+
+void setFSMProtocolState(uint8_t state);
 
 #endif /* INC_PROTOCOL_PARSER_H_ */

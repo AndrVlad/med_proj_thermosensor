@@ -6,8 +6,9 @@
  */
 
 #include "SPI_Connection.h"
+#include "protocol_common.h"
 
-bool spi_rx_complete = false;
+bool spi_rx_complete, response_ready = false;
 bool spi_state;
 
 uint8_t response_frame[264] = {};		// буфер для хранения команды от мастера
@@ -16,16 +17,25 @@ uint8_t dummy_frame[264] = {};			// буфер-заглушка для отве�
 uint8_t trash_frame[264] = {};			// буфер для приема заглушки от мастера
 uint8_t *spi_tx_ptr, *spi_rx_ptr;		// указатели на буфера для передачи по SPI
 bool cs_selected = false;
+uint8_t new_response_frame[264] = {0};
+uint8_t wait_response_frame[264] = {0};
 
 void switchBuffer(bool spi_state);
+void initResponseBuffer();
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
     // Мастер опустил CS
 	if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET) {
-	// Запускаем прием/передачу
+		// проверка на наличие готового ответа для отправки
+		if(response_ready && spi_state == SPI_MODE_TX) { 	// если ответ готов и датчик в режиме передатчика
+			spi_tx_ptr = new_response_frame;				// использовать для передачи сформированный ответ
+			response_ready = false;
+		} else if (spi_state == SPI_MODE_TX){				// ответ не готов и датчик в режиме передатчика
+			spi_tx_ptr = wait_response_frame;				// использовать для передачи кадр с состоянием STATE_WAIT
+		}
+		// Запускаем прием/передачу
 		HAL_SPI_TransmitReceive_IT(&hspi2, spi_tx_ptr, spi_rx_ptr, FRAME_LEN);
-		cs_selected = true;
     }
 }
 
@@ -38,11 +48,26 @@ void initSPIConnection() {
 	spi_state = SPI_MODE_RX;
 	switchBuffer(spi_state);
 	fillBuffer(dummy_frame, 0xA);
+	initResponseBuffer();
+};
+
+void initResponseBuffer() {
+	wait_response_frame[0] = 0xFA;
+	wait_response_frame[1] = 0xAF;
+	wait_response_frame[1] = STATE_WAIT;
+	wait_response_frame[258] = 0xFF;
+	wait_response_frame[259] = 0x0D;
+	// TODO: добавить рассчитанные значения CRC
+	wait_response_frame[260] = 0xFA;
+	wait_response_frame[261] = 0xAF;
+	wait_response_frame[262] = 0xFF;
+	wait_response_frame[263] = 0x0D;
+
 };
 
 void switchBuffer(bool spi_state) {
 	if(spi_state == SPI_MODE_TX) {
-		spi_tx_ptr = &response_frame[0];
+		//spi_tx_ptr = &response_frame[0];
 		spi_rx_ptr = &trash_frame[0];
 	} else {
 		spi_tx_ptr = &dummy_frame[0];
@@ -60,6 +85,7 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
         } else {
         	// сделать датчик передатчиком в следующем сеансе
         	spi_state = SPI_MODE_TX;
+        	// сохранить полученную команду от мастера в безопасный буфер
         	memcpy(safe_response_frame,response_frame,FRAME_LEN);
         	spi_rx_complete = true;
         }
