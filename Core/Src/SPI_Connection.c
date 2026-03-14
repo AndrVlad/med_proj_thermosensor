@@ -12,12 +12,12 @@ bool spi_rx_complete, response_ready = false;
 bool spi_state;
 
 uint8_t response_frame[264] = {};		// буфер для хранения команды от мастера
-uint8_t safe_response_frame[264] = {};
+uint8_t safe_command_frame[264] = {};
 uint8_t dummy_frame[264] = {};			// буфер-заглушка для ответа мастеру
 uint8_t trash_frame[264] = {};			// буфер для приема заглушки от мастера
 uint8_t *spi_tx_ptr, *spi_rx_ptr;		// указатели на буфера для передачи по SPI
 bool cs_selected = false;
-uint8_t new_response_frame[264] = {0};
+uint8_t *new_response_frame;
 uint8_t wait_response_frame[264] = {0};
 
 void switchBuffer(bool spi_state);
@@ -86,7 +86,7 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
         	// сделать датчик передатчиком в следующем сеансе
         	spi_state = SPI_MODE_TX;
         	// сохранить полученную команду от мастера в безопасный буфер
-        	memcpy(safe_response_frame,response_frame,FRAME_LEN);
+        	memcpy(safe_command_frame,response_frame,FRAME_LEN);
         	spi_rx_complete = true;
         }
         switchBuffer(spi_state);
