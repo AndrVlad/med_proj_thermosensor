@@ -2,6 +2,6 @@
 ../Core/Src/protocol_parser.c:83:6:fillResponseFrame	24	static
 ../Core/Src/protocol_parser.c:113:6:sendPreviousResponse	4	static
 ../Core/Src/protocol_parser.c:123:6:parserFSM	8	static
-../Core/Src/protocol_parser.c:274:6:checkCRC32	24	static
-../Core/Src/protocol_parser.c:291:10:calculateCRC32	24	static
-../Core/Src/protocol_parser.c:299:10:sensorSelfCheck	4	static
+../Core/Src/protocol_parser.c:281:6:checkCRC32	24	static
+../Core/Src/protocol_parser.c:298:10:calculateCRC32	24	static
+../Core/Src/protocol_parser.c:306:10:sensorSelfCheck	4	static

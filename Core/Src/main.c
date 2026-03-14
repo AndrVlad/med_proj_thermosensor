@@ -88,7 +88,7 @@ void sensorInit() {
 	initSPIConnection();
 	// отправка сигнала на CTRL для уведомления мастера о подключении датчика
 	sendInitCTRL();
-	// установка внутреннего состояния FSM протокола
+	// установка состояния датчика "датчик подключен"
 	setFSMProtocolState(CONNECTED_STATE);
 }
 /* Формирует сигнал CTRL для уведомления мастера о подключении датчика */
@@ -152,10 +152,10 @@ int main(void)
 	  if (spi_rx_complete) {
 		  // отправка сигнала на CTRL для уведомления мастера о получении команды
 		  sendRxCompleteCTRL();
-		  //parser();
 		  spi_rx_complete = false;
+		  parserFSM();
 	  }
-
+/*	KSS Block begin
     HAL_UART_Receive(&huart1,(uint8_t*)dt1,1,0x10);  //wait for cmd
     //commands
     if(dt1[0] == '0') //erase mem
@@ -222,6 +222,7 @@ int main(void)
       buf_ptr = 0;
     }
     HAL_Delay(1);
+    KSS Block end */
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

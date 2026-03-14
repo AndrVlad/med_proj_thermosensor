@@ -16,7 +16,7 @@ enum FSM_States {
 	MEASUREMENT_EXCHANGE_STATE
 };
 
-void parser(uint8_t* command_frame);
+void parserFSM();
 // открыто здесь для тестов
 bool checkCRC32(uint8_t* command_frame, uint16_t length);
 // открыто здесь для тестов
