@@ -127,11 +127,12 @@ void parserFSM() {
 		fillResponseFrame(CRC_ERROR, 0);
 		return;
 	}
-	// анализ состояния датчика
+
 	switch(FSM_state) {
 	case CONNECTED_STATE:
 		// анализ полученной команды
 		switch (safe_command_frame[2]) {
+		/*
 		case CMD_GET_MEASURE:
 			if(meas_data_ready) { // данные измерения есть
 				fillResponseFrame(STATE_READY, CMD_GET_MEASURE);
@@ -140,13 +141,16 @@ void parserFSM() {
 			} else {
 				fillResponseFrame(STATE_NOT_READY, CMD_GET_MEASURE);
 			}
-			break;
+			break; */
 		case CMD_STATUS:
-			// выполнение самопроверки
-			if (sensorSelfCheck()) {
-				FSM_state = READY_STATE;
+			if (sensorSelfCheck()) { 		// самопроверка датчика выполнилась успешно
+				if (meas_data_ready) { 		// данные для передачи уже готовы
+					FSM_state = EXCHANGE_STATE;
+				} else {					// данных для передачи нет
+					FSM_state = READY_STATE;
+				}
 				fillResponseFrame(SENSOR_ID, CMD_STATUS);
-			} else {
+			} else {				// самопроверка датчика указала на его неисправность
 				fillResponseFrame(STATE_ERROR, CMD_STATUS);
 			}
 			break;
@@ -199,7 +203,7 @@ void parserFSM() {
 		// анализ полученной команды
 		switch (safe_command_frame[2]) {
 		case CMD_GET_MEASURE:
-
+			//fillDataFrame();
 			break;
 		case CMD_STATUS:
 			break;
