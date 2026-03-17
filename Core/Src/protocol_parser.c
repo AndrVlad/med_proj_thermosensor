@@ -14,12 +14,13 @@
 
 uint8_t response[FRAME_LEN] = {0};
 
-uint8_t data_frame[264] = {0};											// буфер кадра ответа для измерения											// флаг готовности ответа (true - готов, false - не готов)
-uint16_t meas_request_cnt = 0;											// флаг запроса на выполнение измерения
-uint16_t sensor_state = STATE_NOT_READY;								// внутреннее состояние датчика (работоспособность)
-uint16_t measurement_state = STATE_NOT_READY;							// статус готовности результата измерения
-uint8_t FSM_state;														// текущее состояние FSM
-bool meas_data_ready = false;											// признак готовности измеренных данных
+uint8_t data_frame[FRAME_LEN] = {0};				// буфер кадра ответа для измерения											// флаг готовности ответа (true - готов, false - не готов)
+uint16_t meas_request_cnt = 0;						// флаг запроса на выполнение измерения
+uint16_t sensor_state = STATE_NOT_READY;			// внутреннее состояние датчика (работоспособность)
+uint16_t measurement_state = STATE_NOT_READY;		// статус готовности результата измерения
+uint8_t FSM_state;									// текущее состояние FSM
+bool meas_data_ready = false;						// признак готовности измеренных данных
+uint8_t measurement_bytes_num = 0;					// число фактически готовых байт измерения
 
 // рассчитанная таблица CRC-32
 const uint32_t crc32_table[256] = {
@@ -77,6 +78,27 @@ uint32_t calculateCRC32(uint8_t* arg,uint16_t length);
 void setFSMProtocolState(uint8_t state) {
 	FSM_state = state;
 }
+/* Заполняет кадр ответа с данными измерения и уведомляет модуль SPI_connection о готовности ответа к отправке */
+void fillDataFrame() {
+	// формирование кадра ответа с данными
+	memset(data_frame,0,FRAME_LEN);
+	data_frame[0] = 0xFA;
+	data_frame[1] = 0xAA;
+	data_frame[3] = measurement_bytes_num;
+	// заполнение поля
+	fillDataField(data_struct_type);
+
+	data_frame[258] = 0xFF;
+	data_frame[259] = 0x0B;
+
+	// формирование CRC для кадра в порядке MSB
+	uint32_t crc = calculateCRC32(data_frame,FRAME_LEN);
+	data_frame[260] = (crc >> 24) & 0xFF;
+	data_frame[261] = (crc >> 16) & 0xFF;
+	data_frame[262] = (crc >> 8) & 0xFF;
+	data_frame[263] = crc & 0xFF;
+};
+
 /* Заполняет кадр ответа и уведомляет модуль SPI_connection о готовности ответа к отправке
  * Параметр 1: код состояния датчика по протоколу
  * Параметр 2: код команды, на которую дается ответ */
