@@ -1,7 +1,10 @@
-../Core/Src/protocol_parser.c:77:6:setFSMProtocolState	16	static
-../Core/Src/protocol_parser.c:83:6:fillResponseFrame	24	static
-../Core/Src/protocol_parser.c:113:6:sendPreviousResponse	4	static
-../Core/Src/protocol_parser.c:123:6:parserFSM	8	static
-../Core/Src/protocol_parser.c:281:6:checkCRC32	24	static
-../Core/Src/protocol_parser.c:298:10:calculateCRC32	24	static
-../Core/Src/protocol_parser.c:306:10:sensorSelfCheck	4	static
+../Core/Src/protocol_parser.c:83:6:setFSMProtocolState	16	static
+../Core/Src/protocol_parser.c:87:6:fillDataFrame	16	static
+../Core/Src/protocol_parser.c:107:6:fillDataField	16	static
+../Core/Src/protocol_parser.c:118:6:fillResponseFrame	24	static
+../Core/Src/protocol_parser.c:145:6:sendPreviousResponse	8	static
+../Core/Src/protocol_parser.c:158:6:updateSavedResponse	24	static
+../Core/Src/protocol_parser.c:180:6:parserFSM	8	static
+../Core/Src/protocol_parser.c:342:6:checkCRC32	24	static
+../Core/Src/protocol_parser.c:359:10:calculateCRC32	24	static
+../Core/Src/protocol_parser.c:367:10:sensorSelfCheck	4	static

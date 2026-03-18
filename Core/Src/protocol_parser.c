@@ -9,11 +9,14 @@
 #include "protocol_common.h"
 #include "protocol_parser.h"
 #include "SPI_Connection.h"
+#include "w25q_spi.h"
+
+extern w25_info_t  w25_info;
 
 /* раздел объявления переменных */
 
 uint8_t response[FRAME_LEN] = {0};
-
+uint8_t data_buf[256] = {0};						// буфер с данными (заполняет поле данных в кадре ответа с данными)
 uint8_t data_frame[FRAME_LEN] = {0};				// буфер кадра ответа для измерения											// флаг готовности ответа (true - готов, false - не готов)
 uint16_t meas_request_cnt = 0;						// флаг запроса на выполнение измерения
 uint16_t sensor_state = STATE_NOT_READY;			// внутреннее состояние датчика (работоспособность)
@@ -72,8 +75,10 @@ const uint32_t crc32_table[256] = {
 
 /* раздел объявления функций */
 uint32_t calculateCRC32(uint8_t* arg,uint16_t length);
-
+void updateSavedResponse(uint8_t* response);
+void fillDataField();
 /* реализация функций */
+
 
 void setFSMProtocolState(uint8_t state) {
 	FSM_state = state;
@@ -84,9 +89,9 @@ void fillDataFrame() {
 	memset(data_frame,0,FRAME_LEN);
 	data_frame[0] = 0xFA;
 	data_frame[1] = 0xAA;
-	data_frame[3] = measurement_bytes_num;
-	// заполнение поля
-	fillDataField(data_struct_type);
+	data_frame[2] = measurement_bytes_num;
+	// заполнение поля данных
+	fillDataField();
 
 	data_frame[258] = 0xFF;
 	data_frame[259] = 0x0B;
@@ -97,6 +102,14 @@ void fillDataFrame() {
 	data_frame[261] = (crc >> 16) & 0xFF;
 	data_frame[262] = (crc >> 8) & 0xFF;
 	data_frame[263] = crc & 0xFF;
+};
+
+void fillDataField() {
+	// чтение страницы флеш-памяти в буфер с данными
+	W25_Read_Page(data_buf, 0, 0, w25_info.PageSize);
+	for (uint16_t i = 0, k = 3; i < 256; i++, k++) {
+		data_frame[k] = data_buf[i];
+	}
 };
 
 /* Заполняет кадр ответа и уведомляет модуль SPI_connection о готовности ответа к отправке
@@ -113,8 +126,6 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 	if (command_code == CMD_STATUS) {
 		// установка признака наличия хотя бы одного готового результата измерения
 		response[3] = meas_data_ready;
-	} else {
-		response[3] = 0;
 	}
 
 	// формирование CRC для кадра в порядке MSB
@@ -129,18 +140,42 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 
 	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
 	response_ready = true;
-	return;
 };
 /* Подготавливает к отправке предыдущий кадр ответа */
 void sendPreviousResponse() {
 
-	// устанавливаем указатель модуля приема/передачи на буфер с прошлым ответом
+	// обновление сохраненного ответа
+	updateSavedResponse(response);
+
+	// устанавливаем указатель модуля приема/передачи на буфер с прошлым ответом для его передачи
 	new_response_frame = response;
 
 	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
 	response_ready = true;
 	return;
 };
+
+void updateSavedResponse(uint8_t* response) {
+
+	// определение типа сохраненного кадра ответа
+	if (response[1] == 0xAA) { // кадр ответа с данными (проверка 2-го байта старт-слова)
+		// обновление признака конца инф.памяти
+		response[2] = measurement_bytes_num;
+	} else {	// кадр ответа на команду
+		if (response[2] == CMD_STATUS) {
+			// обновление признака наличия хотя бы одного готового результата измерения
+			response[3] = meas_data_ready;
+		}
+	}
+
+	// формирование CRC для кадра в порядке MSB
+	uint32_t crc = calculateCRC32(response,FRAME_LEN);
+	response[260] = (crc >> 24) & 0xFF;
+	response[261] = (crc >> 16) & 0xFF;
+	response[262] = (crc >> 8) & 0xFF;
+	response[263] = crc & 0xFF;
+	return;
+}
 
 void parserFSM() {
 	// проверка контрольной суммы
