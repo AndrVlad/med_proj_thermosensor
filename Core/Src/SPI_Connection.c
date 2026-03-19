@@ -57,7 +57,7 @@ void initResponseBuffer() {
 	wait_response_frame[1] = STATE_WAIT;
 	wait_response_frame[258] = 0xFF;
 	wait_response_frame[259] = 0x0D;
-	// TODO: добавить рассчитанные значения CRC
+	// TODO: добавить рассчет CRC
 	wait_response_frame[260] = 0xFA;
 	wait_response_frame[261] = 0xAF;
 	wait_response_frame[262] = 0xFF;

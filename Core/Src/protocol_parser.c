@@ -16,8 +16,7 @@ extern w25_info_t  w25_info;
 /* раздел объявления переменных */
 
 uint8_t response[FRAME_LEN] = {0};
-uint8_t data_buf[256] = {0};						// буфер с данными (заполняет поле данных в кадре ответа с данными)
-uint8_t data_frame[FRAME_LEN] = {0};				// буфер кадра ответа для измерения											// флаг готовности ответа (true - готов, false - не готов)
+uint8_t data_buf[256] = {0};						// буфер с данными измерения ( используется для заполнения поля данных в кадре ответа с данными)
 uint16_t meas_request_cnt = 0;						// флаг запроса на выполнение измерения
 uint16_t sensor_state = STATE_NOT_READY;			// внутреннее состояние датчика (работоспособность)
 uint16_t measurement_state = STATE_NOT_READY;		// статус готовности результата измерения
@@ -79,36 +78,52 @@ void updateSavedResponse(uint8_t* response);
 void fillDataField();
 /* реализация функций */
 
+/* Вовзращает признак наличия готовых данных для измерения
+ * 1 - если уже накопились данные измерения, помимо текущего пакета с данными
+ * 0 - готовых данных измерений больше нет */
+bool isAvailableMeasData() {
+
+	return 0;
+}
+
+
 
 void setFSMProtocolState(uint8_t state) {
 	FSM_state = state;
 }
-/* Заполняет кадр ответа с данными измерения и уведомляет модуль SPI_connection о готовности ответа к отправке */
+/* Заполняет кадр ответа с данными измерения и уведомляет модуль SPI_connection
+ * о готовности ответа к отправке */
 void fillDataFrame() {
 	// формирование кадра ответа с данными
-	memset(data_frame,0,FRAME_LEN);
-	data_frame[0] = 0xFA;
-	data_frame[1] = 0xAA;
-	data_frame[2] = measurement_bytes_num;
+	memset(response,0,FRAME_LEN);
+	response[0] = 0xFA;
+	response[1] = 0xAA;
+	response[2] = isAvailableMeasData();
 	// заполнение поля данных
 	fillDataField();
 
-	data_frame[258] = 0xFF;
-	data_frame[259] = 0x0B;
+	response[258] = 0xFF;
+	response[259] = 0x0B;
 
 	// формирование CRC для кадра в порядке MSB
-	uint32_t crc = calculateCRC32(data_frame,FRAME_LEN);
-	data_frame[260] = (crc >> 24) & 0xFF;
-	data_frame[261] = (crc >> 16) & 0xFF;
-	data_frame[262] = (crc >> 8) & 0xFF;
-	data_frame[263] = crc & 0xFF;
+	uint32_t crc = calculateCRC32(response,FRAME_LEN);
+	response[260] = (crc >> 24) & 0xFF;
+	response[261] = (crc >> 16) & 0xFF;
+	response[262] = (crc >> 8) & 0xFF;
+	response[263] = crc & 0xFF;
+
+	// устанавливаем указатель модуля приема/передачи на буфер с подготовленным ответом
+	new_response_frame = response;
+
+	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
+	response_ready = true;
 };
 
 void fillDataField() {
 	// чтение страницы флеш-памяти в буфер с данными
 	W25_Read_Page(data_buf, 0, 0, w25_info.PageSize);
 	for (uint16_t i = 0, k = 3; i < 256; i++, k++) {
-		data_frame[k] = data_buf[i];
+		response[k] = data_buf[i];
 	}
 };
 
@@ -159,8 +174,8 @@ void updateSavedResponse(uint8_t* response) {
 
 	// определение типа сохраненного кадра ответа
 	if (response[1] == 0xAA) { // кадр ответа с данными (проверка 2-го байта старт-слова)
-		// обновление признака конца инф.памяти
-		response[2] = measurement_bytes_num;
+		// обновление признака наличия данных измерения помимо текущего пакета с данными
+		response[2] = isAvailableMeasData();
 	} else {	// кадр ответа на команду
 		if (response[2] == CMD_STATUS) {
 			// обновление признака наличия хотя бы одного готового результата измерения
@@ -189,22 +204,12 @@ void parserFSM() {
 	case CONNECTED_STATE:
 		// анализ полученной команды
 		switch (safe_command_frame[2]) {
-		/*
-		case CMD_GET_MEASURE:
-			if(meas_data_ready) { // данные измерения есть
-				fillResponseFrame(STATE_READY, CMD_GET_MEASURE);
-				FSM_state = EXCHANGE_STATE;
-				//fillDataFrame();
-			} else {
-				fillResponseFrame(STATE_NOT_READY, CMD_GET_MEASURE);
-			}
-			break; */
 		case CMD_STATUS:
 			if (sensorSelfCheck()) { 		// самопроверка датчика выполнилась успешно
 				if (meas_data_ready) { 		// данные для передачи уже готовы
-					FSM_state = EXCHANGE_STATE;
+					setFSMProtocolState(EXCHANGE_STATE);
 				} else {					// данных для передачи нет
-					FSM_state = READY_STATE;
+					setFSMProtocolState(READY_STATE);
 				}
 				fillResponseFrame(SENSOR_ID, CMD_STATUS);
 			} else {				// самопроверка датчика указала на его неисправность
@@ -223,15 +228,27 @@ void parserFSM() {
 	case READY_STATE:
 		// анализ полученной команды
 		switch (safe_command_frame[2]) {
-		case CMD_GET_MEASURE:
-
-			break;
 		case CMD_STATUS:
+			if (sensorSelfCheck()) { 		// самопроверка датчика выполнилась успешно
+				if (meas_data_ready) { 		// данные для передачи уже готовы
+					setFSMProtocolState(EXCHANGE_STATE);
+				} else {					// данных для передачи нет
+					setFSMProtocolState(READY_STATE);
+				}
+				fillResponseFrame(SENSOR_ID, CMD_STATUS);
+			} else {				// самопроверка датчика указала на его неисправность
+				fillResponseFrame(STATE_ERROR, CMD_STATUS);
+			}
 			break;
 		case CMD_RESET:
 			//resetSensor();
 			fillResponseFrame(STATE_RESET, CMD_RESET);
-			FSM_state = CONNECTED_STATE;
+			setFSMProtocolState(CONNECTED_STATE);
+			break;
+		case CMD_START_MEASURE:
+			fillResponseFrame(STATE_START_MEASURE, CMD_START_MEASURE);
+			startMeasurement();
+			setFSMProtocolState(MEASUREMENT_STATE);
 			break;
 		case CMD_CRC_ANS_ERR:
 			sendPreviousResponse();
@@ -242,14 +259,24 @@ void parserFSM() {
 		// анализ полученной команды
 		switch (safe_command_frame[2]) {
 		case CMD_GET_MEASURE:
-
+			setFSMProtocolState(MEASUREMENT_EXCHANGE_STATE);
 			break;
 		case CMD_STATUS:
+			if (meas_data_ready) { 		// данные для передачи уже готовы
+				fillResponseFrame(STATE_READY, CMD_STATUS);
+			} else {					// данных для передачи нет
+				fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
+			}
 			break;
 		case CMD_RESET:
 			//resetSensor();
 			fillResponseFrame(STATE_RESET, CMD_RESET);
-			FSM_state = CONNECTED_STATE;
+			setFSMProtocolState(CONNECTED_STATE);
+			break;
+		case CMD_STOP_MEASURE:
+			stopMeasurement();
+			fillResponseFrame(STATE_STOP_MEASURE, CMD_STOP_MEASURE);
+			setFSMProtocolState(READY_STATE);
 			break;
 		case CMD_CRC_ANS_ERR:
 			sendPreviousResponse();
@@ -260,14 +287,24 @@ void parserFSM() {
 		// анализ полученной команды
 		switch (safe_command_frame[2]) {
 		case CMD_GET_MEASURE:
-			//fillDataFrame();
+			fillDataFrame();
 			break;
 		case CMD_STATUS:
+			if (meas_data_ready) { 		// данные для передачи уже готовы
+				fillResponseFrame(STATE_READY, CMD_STATUS);
+			} else {					// данных для передачи нет
+				fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
+			}
 			break;
 		case CMD_RESET:
 			//resetSensor();
 			fillResponseFrame(STATE_RESET, CMD_RESET);
-			FSM_state = CONNECTED_STATE;
+			setFSMProtocolState(CONNECTED_STATE);
+			break;
+		case CMD_START_MEASURE:
+			fillResponseFrame(STATE_START_MEASURE, CMD_START_MEASURE);
+			startMeasurement();
+			setFSMProtocolState(MEASUREMENT_EXCHANGE_STATE);
 			break;
 		case CMD_CRC_ANS_ERR:
 			sendPreviousResponse();
@@ -281,6 +318,11 @@ void parserFSM() {
 
 			break;
 		case CMD_STATUS:
+			if (meas_data_ready) { 		// данные для передачи уже готовы
+				fillResponseFrame(STATE_READY, CMD_STATUS);
+			} else {					// данных для передачи нет
+				fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
+			}
 			break;
 		case CMD_RESET:
 			//resetSensor();
