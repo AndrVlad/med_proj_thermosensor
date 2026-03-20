@@ -22,8 +22,6 @@ bool checkCRC32(uint8_t* command_frame, uint16_t length);
 // открыто здесь для тестов
 uint32_t calculateCRC32(uint8_t* arg,uint16_t length);
 
-uint16_t sensorSelfCheck();
-
 void setFSMProtocolState(uint8_t state);
 
 #endif /* INC_PROTOCOL_PARSER_H_ */

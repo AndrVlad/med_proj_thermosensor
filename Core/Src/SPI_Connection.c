@@ -7,6 +7,7 @@
 
 #include "SPI_Connection.h"
 #include "protocol_common.h"
+#include "protocol_parser.h"
 
 bool spi_rx_complete, response_ready = false;
 bool spi_state;
@@ -57,12 +58,12 @@ void initResponseBuffer() {
 	wait_response_frame[1] = STATE_WAIT;
 	wait_response_frame[258] = 0xFF;
 	wait_response_frame[259] = 0x0D;
-	// TODO: добавить рассчет CRC
-	wait_response_frame[260] = 0xFA;
-	wait_response_frame[261] = 0xAF;
-	wait_response_frame[262] = 0xFF;
-	wait_response_frame[263] = 0x0D;
-
+	// TODO: добавить расчет CRC
+	uint32_t crc = calculateCRC32(wait_response_frame, FRAME_LEN);
+	wait_response_frame[260] = (crc >> 24) & 0xFF;
+	wait_response_frame[261] = (crc >> 16) & 0xFF;
+	wait_response_frame[262] = (crc >> 8) & 0xFF;
+	wait_response_frame[263] = crc & 0xFF;
 };
 
 void switchBuffer(bool spi_state) {

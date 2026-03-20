@@ -1,5 +1,5 @@
-Core/Src/SPI_Connection.o: ../Core/Src/SPI_Connection.c \
- ../Core/Inc/SPI_Connection.h ../Core/Inc/main.h \
+Core/Src/sensor_utils.o: ../Core/Src/sensor_utils.c \
+ ../Core/Inc/sensor_utils.h ../Core/Inc/main.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
  ../Core/Inc/stm32f1xx_hal_conf.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h \
@@ -28,8 +28,8 @@ Core/Src/SPI_Connection.o: ../Core/Src/SPI_Connection.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
- ../Core/Inc/protocol_common.h ../Core/Inc/protocol_parser.h
-../Core/Inc/SPI_Connection.h:
+ ../Drivers/W25Q/w25q_spi.h
+../Core/Inc/sensor_utils.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -59,5 +59,4 @@ Core/Src/SPI_Connection.o: ../Core/Src/SPI_Connection.c \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
-../Core/Inc/protocol_common.h:
-../Core/Inc/protocol_parser.h:
+../Drivers/W25Q/w25q_spi.h:

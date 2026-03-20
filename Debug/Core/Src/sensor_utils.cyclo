@@ -1,0 +1,4 @@
+sensor_utils.c:16:6:sensorSelfCheck	1
+sensor_utils.c:28:6:resetSensor	1
+sensor_utils.c:35:6:startMeasurement	1
+sensor_utils.c:40:6:stopMeasurement	1

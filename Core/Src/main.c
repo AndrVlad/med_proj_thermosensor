@@ -58,7 +58,7 @@ extern w25_info_t  w25_info;
 uint8_t rx_buf[1025];
 uint8_t tx_buf[10];
 extern volatile uint16_t ADC_data;
-char need_save = 0; // 0-idle, 1-save data
+uint8_t need_save = 0; // 0-idle, 1-save data
 volatile uint16_t buf_ptr = 0, page_ptr = 0;
 uint8_t res_buf[256] = {0};
 uint8_t dt1[10];
@@ -75,6 +75,7 @@ static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 void sensorInit();
 void sendInitCTRL();
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -99,6 +100,7 @@ void sendInitCTRL() {
 void sendRxCompleteCTRL() {
 	return;
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -149,10 +151,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if (spi_rx_complete) {
+	  if (spi_rx_complete) { // команда от мастера полностью получена
 		  // отправка сигнала на CTRL для уведомления мастера о получении команды
 		  sendRxCompleteCTRL();
 		  spi_rx_complete = false;
+		  // разбор команды
 		  parserFSM();
 	  }
 /*	KSS Block begin

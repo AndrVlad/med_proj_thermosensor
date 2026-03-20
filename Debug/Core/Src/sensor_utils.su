@@ -1,0 +1,4 @@
+../Core/Src/sensor_utils.c:16:6:sensorSelfCheck	4	static
+../Core/Src/sensor_utils.c:28:6:resetSensor	8	static
+../Core/Src/sensor_utils.c:35:6:startMeasurement	4	static
+../Core/Src/sensor_utils.c:40:6:stopMeasurement	4	static

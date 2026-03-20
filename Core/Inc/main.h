@@ -71,6 +71,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 extern SPI_HandleTypeDef hspi2;
+extern uint8_t need_save;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

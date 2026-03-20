@@ -10,6 +10,7 @@
 #include "protocol_parser.h"
 #include "SPI_Connection.h"
 #include "w25q_spi.h"
+#include "sensor_utils.h"
 
 extern w25_info_t  w25_info;
 
@@ -85,8 +86,6 @@ bool isAvailableMeasData() {
 
 	return 0;
 }
-
-
 
 void setFSMProtocolState(uint8_t state) {
 	FSM_state = state;
@@ -217,7 +216,7 @@ void parserFSM() {
 			}
 			break;
 		case CMD_RESET:
-			//resetSensor();
+			resetSensor();
 			fillResponseFrame(STATE_RESET, CMD_RESET);
 			break;
 		case CMD_CRC_ANS_ERR:
@@ -241,7 +240,7 @@ void parserFSM() {
 			}
 			break;
 		case CMD_RESET:
-			//resetSensor();
+			resetSensor();
 			fillResponseFrame(STATE_RESET, CMD_RESET);
 			setFSMProtocolState(CONNECTED_STATE);
 			break;
@@ -269,7 +268,7 @@ void parserFSM() {
 			}
 			break;
 		case CMD_RESET:
-			//resetSensor();
+			resetSensor();
 			fillResponseFrame(STATE_RESET, CMD_RESET);
 			setFSMProtocolState(CONNECTED_STATE);
 			break;
@@ -298,7 +297,7 @@ void parserFSM() {
 			}
 			break;
 		case CMD_RESET:
-			//resetSensor();
+			resetSensor();
 			fillResponseFrame(STATE_RESET, CMD_RESET);
 			setFSMProtocolState(CONNECTED_STATE);
 			break;
@@ -326,7 +325,7 @@ void parserFSM() {
 			}
 			break;
 		case CMD_RESET:
-			//resetSensor();
+			resetSensor();
 			fillResponseFrame(STATE_RESET, CMD_RESET);
 			FSM_state = CONNECTED_STATE;
 			break;
@@ -394,7 +393,7 @@ bool checkCRC32(uint8_t* command_frame, uint16_t length) {
 							((uint32_t)command_frame[261] << 16) |
 							((uint32_t)command_frame[260] << 24);
 
-	// расчет ожидаемой CRC для полученной посылки
+	// расчет ожидаемой CRC для полученного кадра
 	uint32_t calc_crc = calculateCRC32(command_frame, FRAME_LEN);
 	// сравнение полученной и ожидаемой CRC
 	if (command_crc != calc_crc) {
@@ -411,15 +410,5 @@ uint32_t calculateCRC32(uint8_t* arg,uint16_t length) {
   return ~crc_f;
 }
 
-/* Описание: выполняет проверку работоспособности датчика */
-uint16_t sensorSelfCheck() {
 
-	// код для выполнения проверки датчика ...
-
-	if(true) {	// проверка успешна
-		return true;
-	} else {
-		return false;
-	}
-}
 
