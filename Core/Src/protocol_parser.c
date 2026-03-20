@@ -294,6 +294,7 @@ void parserFSM() {
 				fillResponseFrame(STATE_READY, CMD_STATUS);
 			} else {					// данных для передачи нет
 				fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
+				setFSMProtocolState(READY_STATE);
 			}
 			break;
 		case CMD_RESET:
@@ -315,7 +316,7 @@ void parserFSM() {
 		// анализ полученной команды
 		switch (safe_command_frame[2]) {
 		case CMD_GET_MEASURE:
-
+			fillDataFrame();
 			break;
 		case CMD_STATUS:
 			if (meas_data_ready) { 		// данные для передачи уже готовы
@@ -328,6 +329,11 @@ void parserFSM() {
 			//resetSensor();
 			fillResponseFrame(STATE_RESET, CMD_RESET);
 			FSM_state = CONNECTED_STATE;
+			break;
+		case CMD_STOP_MEASURE:
+			stopMeasurement();
+			fillResponseFrame(STATE_STOP_MEASURE, CMD_STOP_MEASURE);
+			setFSMProtocolState(EXCHANGE_STATE);
 			break;
 		case CMD_CRC_ANS_ERR:
 			sendPreviousResponse();
