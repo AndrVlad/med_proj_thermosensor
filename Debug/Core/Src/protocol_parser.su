@@ -6,5 +6,5 @@
 ../Core/Src/protocol_parser.c:159:6:sendPreviousResponse	8	static
 ../Core/Src/protocol_parser.c:172:6:updateSavedResponse	24	static
 ../Core/Src/protocol_parser.c:194:6:parserFSM	8	static
-../Core/Src/protocol_parser.c:389:6:checkCRC32	24	static
-../Core/Src/protocol_parser.c:406:10:calculateCRC32	24	static
+../Core/Src/protocol_parser.c:390:6:checkCRC32	24	static
+../Core/Src/protocol_parser.c:407:10:calculateCRC32	24	static

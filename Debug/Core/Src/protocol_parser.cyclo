@@ -5,6 +5,6 @@ protocol_parser.c:121:6:fillDataField	2
 protocol_parser.c:132:6:fillResponseFrame	2
 protocol_parser.c:159:6:sendPreviousResponse	1
 protocol_parser.c:172:6:updateSavedResponse	3
-protocol_parser.c:194:6:parserFSM	45
-protocol_parser.c:389:6:checkCRC32	2
-protocol_parser.c:406:10:calculateCRC32	2
+protocol_parser.c:194:6:parserFSM	44
+protocol_parser.c:390:6:checkCRC32	2
+protocol_parser.c:407:10:calculateCRC32	2

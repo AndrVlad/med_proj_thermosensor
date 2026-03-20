@@ -192,13 +192,14 @@ void updateSavedResponse(uint8_t* response) {
 }
 
 void parserFSM() {
+#ifdef TEST_VER
 	// проверка контрольной суммы
 	if(!checkCRC32(safe_command_frame, FRAME_LEN)) {
 		// формирование ответа - ошибка CRC
 		fillResponseFrame(CRC_ERROR, 0);
 		return;
 	}
-
+#endif
 	switch(FSM_state) {
 	case CONNECTED_STATE:
 		// анализ полученной команды
