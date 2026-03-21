@@ -77,6 +77,8 @@ const uint32_t crc32_table[256] = {
 uint32_t calculateCRC32(uint8_t* arg,uint16_t length);
 void updateSavedResponse(uint8_t* response);
 void fillDataField();
+void sendInitCTRL();
+void sendRxCompleteCTRL();
 /* реализация функций */
 
 /* Вовзращает признак наличия готовых данных для измерения
@@ -193,6 +195,7 @@ void updateSavedResponse(uint8_t* response) {
 
 void parserFSM() {
 #ifdef TEST_VER
+	sendRxCompleteCTRL();
 	// проверка контрольной суммы
 	if(!checkCRC32(safe_command_frame, FRAME_LEN)) {
 		// формирование ответа - ошибка CRC
@@ -411,5 +414,23 @@ uint32_t calculateCRC32(uint8_t* arg,uint16_t length) {
   return ~crc_f;
 }
 
-
+/* Инициализация датчика при его подключении */
+void sensorInit() {
+	// инициализация флеш-памяти
+	W25_Ini(0);
+	// инициализация SPI-соединения
+	initSPIConnection();
+	// отправка сигнала на CTRL для уведомления мастера о подключении датчика
+	sendInitCTRL();
+	// установка состояния датчика "датчик подключен"
+	setFSMProtocolState(CONNECTED_STATE);
+}
+/* Формирует сигнал CTRL для уведомления мастера о подключении датчика */
+void sendInitCTRL() {
+	return;
+}
+/* Формирует сигнал CTRL для уведомления мастера о получении команды */
+void sendRxCompleteCTRL() {
+	return;
+}
 

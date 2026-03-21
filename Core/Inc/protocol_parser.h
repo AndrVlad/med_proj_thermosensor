@@ -17,6 +17,7 @@ enum FSM_States {
 };
 
 void parserFSM();
+void sensorInit();
 // открыто здесь для тестов
 bool checkCRC32(uint8_t* command_frame, uint16_t length);
 // открыто здесь для тестов
