@@ -12,6 +12,8 @@
 #include "w25q_spi.h"
 #include "sensor_utils.h"
 
+#define LIMIT_PAGE_NUM 524288
+
 extern w25_info_t  w25_info;
 
 /* раздел объявления переменных */
@@ -23,6 +25,12 @@ uint16_t measurement_state = STATE_NOT_READY;		// статус готовнос�
 uint8_t FSM_state;									// текущее состояние FSM
 bool meas_data_ready = false;						// признак готовности измеренных данных
 uint8_t measurement_bytes_num = 0;					// число фактически готовых байт измерения
+
+// хранит информацию о страницах и позициях, которые были считаны с флеш
+struct {
+	uint8_t cur_page_num;		// номер текущей страницы с которой происходит чтение
+	uint8_t page_offset_read;	// смещение в словах (слово = 2 байта) которое было считано в последний раз
+} read = {.cur_page_num = 0, .page_offset_read = -1};
 
 // рассчитанная таблица CRC-32
 const uint32_t crc32_table[256] = {
@@ -128,7 +136,53 @@ void fillDataFrame() {
 };
 
 void fillDataField() {
+
+	uint8_t first_elem, last_elem, curr_page_pos_ptr, curr_page_ptr;
+
+	// сохранение последнего значения смещения записанных байт в странице
+	curr_page_pos_ptr = page_pos_ptr;
+
+	// сохранение последнего номера страницы, используемого для записи
+	curr_page_ptr = page_ptr;
+
+	// определение страницы флеш-памяти, которую необходимо считать
+	if (read.page_offset_read == 126) { 				// страница считана полностью
+		if (cur_page_num == LIMIT_FLASH_PAGE_NUM) { // текущая считанная страница последняя
+			read.cur_page_num = 0;
+		} else {
+			read.cur_page_num++;
+		}
+	}
+
+	// определение в какой странице находится текущее смещение записанных байт флеш-памяти
+	if (read.cur_page_num != page_ptr) { 	// если указатель записанных байт на другой странице
+		curr_page_pos_ptr = 127; 			// будет выполняться чтение до конца текущей страницы
+	}
+
 	// чтение страницы флеш-памяти в буфер с данными
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
+    W25_Read_Page(data_buf, read.cur_page_num, 0, w25_info.PageSize);
+
+    // определение смещения, с которого необходимо добавлять байты в поле данных считанной страницы
+    if (read.page_offset_read == -1) {
+    	first_elem = 0;
+    } else {
+    	first_elem = (read.page_offset_read + 1) * 2;
+    }
+
+    // определение последнего номера байта, который необходимо записать в поле данных
+    last_elem = (curr_page_pos_ptr * 2) - 1;
+
+	for (uint16_t k = 3, i = first_elem; i <= last_elem; i++, k++) {
+		response[k] = data_buf[i];
+	}
+	// сохранение номера последнего считанного слова страницы
+	if (read.page_offset_read == -1) {
+		read.page_offset_read = 0;
+	} else {
+		read.page_offset_read = curr_page_pos_ptr - 1;
+	}
+
 	/*
 	W25_Read_Page(data_buf, 0, 0, w25_info.PageSize);
 	for (uint16_t i = 0, k = 3; i < 256; i++, k++) {
