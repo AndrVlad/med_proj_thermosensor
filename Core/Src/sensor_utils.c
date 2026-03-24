@@ -27,7 +27,11 @@ bool sensorSelfCheck() {
 /* Выполняет сброс датчика */
 void resetSensor() {
 	// очистка флеш-памяти
-	W25_Erase_Chip();
+    W25_Erase_Chip();
+
+    // сброс переменных
+    page_pos_ptr = 0;
+    page_ptr = 0;
 
 	return;
 }

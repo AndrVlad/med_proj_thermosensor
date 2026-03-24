@@ -73,6 +73,8 @@ void Error_Handler(void);
 extern SPI_HandleTypeDef hspi2;
 extern uint8_t data_buf[256];
 extern uint8_t dt1[10];
+extern uint8_t page_pos_ptr ;
+extern volatile uint16_t page_ptr;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
