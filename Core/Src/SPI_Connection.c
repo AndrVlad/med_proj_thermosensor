@@ -48,7 +48,7 @@ void fillBuffer(uint8_t* buf, uint8_t fill_symbol) {
 void initSPIConnection() {
 	spi_state = SPI_MODE_RX;
 	switchBuffer(spi_state);
-	fillBuffer(dummy_frame, 0xA);
+	fillBuffer(dummy_frame, 0xAA);
 	initResponseBuffer();
 };
 

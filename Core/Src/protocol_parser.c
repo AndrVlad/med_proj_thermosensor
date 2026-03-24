@@ -80,9 +80,17 @@ void sendInitCTRL();
 void sendRxCompleteCTRL();
 /* реализация функций */
 
-/* Вовзращает признак наличия готовых данных для измерения
- * 1 - если уже накопились данные измерения, помимо текущего пакета с данными
+/* Вовзращает признак наличия готовых данных для измерения (поле пакета данных - признак наличия данных)
+ * 1 - в текущем кадре будут отправлены не все данные измерения
+ * 	(присутствуют еще данные, записанные в следующие страницы/страницу памяти)
  * 0 - готовых данных измерений больше нет */
+bool isAvailableNextMeasData() {
+
+	return 0;
+}
+/* Вовзращает признак готовности данных измерения (поле ответа данных - признак готовности данных)
+ * 1 - есть хотя-бы один результат измерения
+ * 0 - готовых измерений нет */
 bool isAvailableMeasData() {
 
 	return 0;
@@ -98,7 +106,7 @@ void fillDataFrame() {
 	memset(response,0,FRAME_LEN);
 	response[0] = 0xFA;
 	response[1] = 0xAA;
-	response[2] = isAvailableMeasData();
+	response[2] = isAvailableNextMeasData();
 	// заполнение поля данных
 	fillDataField();
 
@@ -204,146 +212,147 @@ void parserFSM() {
 	}
 #endif
 	switch(FSM_state) {
-	case CONNECTED_STATE:
-		// анализ полученной команды
-		switch (safe_command_frame[2]) {
-		case CMD_STATUS:
-			if (sensorSelfCheck()) { 		// самопроверка датчика выполнилась успешно
-				if (meas_data_ready) { 		// данные для передачи уже готовы
-					setFSMProtocolState(EXCHANGE_STATE);
-				} else {					// данных для передачи нет
-					setFSMProtocolState(READY_STATE);
+		case CONNECTED_STATE:
+			// анализ полученной команды
+			switch (safe_command_frame[2]) {
+			case CMD_STATUS:
+				if (sensorSelfCheck()) { 		// самопроверка датчика выполнилась успешно
+					if (meas_data_ready) { 		// данные для передачи уже готовы
+						setFSMProtocolState(EXCHANGE_STATE);
+					} else {					// данных для передачи нет
+						setFSMProtocolState(READY_STATE);
+					}
+					fillResponseFrame(SENSOR_ID, CMD_STATUS);
+				} else {				// самопроверка датчика указала на его неисправность
+					fillResponseFrame(STATE_ERROR, CMD_STATUS);
 				}
-				fillResponseFrame(SENSOR_ID, CMD_STATUS);
-			} else {				// самопроверка датчика указала на его неисправность
-				fillResponseFrame(STATE_ERROR, CMD_STATUS);
+				break;
+			case CMD_RESET:
+				resetSensor();
+				fillResponseFrame(STATE_RESET, CMD_RESET);
+				break;
+			case CMD_CRC_ANS_ERR:
+				sendPreviousResponse();
+				break;
 			}
 			break;
-		case CMD_RESET:
-			resetSensor();
-			fillResponseFrame(STATE_RESET, CMD_RESET);
-			break;
-		case CMD_CRC_ANS_ERR:
-			sendPreviousResponse();
-			break;
-		}
-		break;
-	case READY_STATE:
-		// анализ полученной команды
-		switch (safe_command_frame[2]) {
-		case CMD_STATUS:
-			if (sensorSelfCheck()) { 		// самопроверка датчика выполнилась успешно
-				if (meas_data_ready) { 		// данные для передачи уже готовы
-					setFSMProtocolState(EXCHANGE_STATE);
-				} else {					// данных для передачи нет
-					setFSMProtocolState(READY_STATE);
+		case READY_STATE:
+			// анализ полученной команды
+			switch (safe_command_frame[2]) {
+			case CMD_STATUS:
+				if (sensorSelfCheck()) { 		// самопроверка датчика выполнилась успешно
+					if (meas_data_ready) { 		// данные для передачи уже готовы
+						setFSMProtocolState(EXCHANGE_STATE);
+					} else {					// данных для передачи нет
+						setFSMProtocolState(READY_STATE);
+					}
+					fillResponseFrame(SENSOR_ID, CMD_STATUS);
+				} else {				// самопроверка датчика указала на его неисправность
+					fillResponseFrame(STATE_ERROR, CMD_STATUS);
 				}
-				fillResponseFrame(SENSOR_ID, CMD_STATUS);
-			} else {				// самопроверка датчика указала на его неисправность
-				fillResponseFrame(STATE_ERROR, CMD_STATUS);
+				break;
+			case CMD_RESET:
+				resetSensor();
+				fillResponseFrame(STATE_RESET, CMD_RESET);
+				setFSMProtocolState(CONNECTED_STATE);
+				break;
+			case CMD_START_MEASURE:
+				fillResponseFrame(STATE_START_MEASURE, CMD_START_MEASURE);
+				startMeasurement();
+				setFSMProtocolState(MEASUREMENT_STATE);
+				break;
+			case CMD_CRC_ANS_ERR:
+				sendPreviousResponse();
+				break;
 			}
 			break;
-		case CMD_RESET:
-			resetSensor();
-			fillResponseFrame(STATE_RESET, CMD_RESET);
-			setFSMProtocolState(CONNECTED_STATE);
-			break;
-		case CMD_START_MEASURE:
-			fillResponseFrame(STATE_START_MEASURE, CMD_START_MEASURE);
-			startMeasurement();
-			setFSMProtocolState(MEASUREMENT_STATE);
-			break;
-		case CMD_CRC_ANS_ERR:
-			sendPreviousResponse();
-			break;
-		}
-		break;
-	case MEASUREMENT_STATE:
-		// анализ полученной команды
-		switch (safe_command_frame[2]) {
-		case CMD_GET_MEASURE:
-			setFSMProtocolState(MEASUREMENT_EXCHANGE_STATE);
-			break;
-		case CMD_STATUS:
-			if (meas_data_ready) { 		// данные для передачи уже готовы
-				fillResponseFrame(STATE_READY, CMD_STATUS);
-			} else {					// данных для передачи нет
-				fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
-			}
-			break;
-		case CMD_RESET:
-			resetSensor();
-			fillResponseFrame(STATE_RESET, CMD_RESET);
-			setFSMProtocolState(CONNECTED_STATE);
-			break;
-		case CMD_STOP_MEASURE:
-			stopMeasurement();
-			fillResponseFrame(STATE_STOP_MEASURE, CMD_STOP_MEASURE);
-			setFSMProtocolState(READY_STATE);
-			break;
-		case CMD_CRC_ANS_ERR:
-			sendPreviousResponse();
-			break;
-		}
-		break;
-	case EXCHANGE_STATE:
-		// анализ полученной команды
-		switch (safe_command_frame[2]) {
-		case CMD_GET_MEASURE:
-			fillDataFrame();
-			break;
-		case CMD_STATUS:
-			if (meas_data_ready) { 		// данные для передачи уже готовы
-				fillResponseFrame(STATE_READY, CMD_STATUS);
-			} else {					// данных для передачи нет
-				fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
+		case MEASUREMENT_STATE:
+			// анализ полученной команды
+			switch (safe_command_frame[2]) {
+			case CMD_GET_MEASURE:
+				setFSMProtocolState(MEASUREMENT_EXCHANGE_STATE);
+				break;
+			case CMD_STATUS:
+				if (meas_data_ready) { 		// данные для передачи уже готовы
+					fillResponseFrame(STATE_READY, CMD_STATUS);
+				} else {					// данных для передачи нет
+					fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
+				}
+				break;
+			case CMD_RESET:
+				resetSensor();
+				fillResponseFrame(STATE_RESET, CMD_RESET);
+				setFSMProtocolState(CONNECTED_STATE);
+				break;
+			case CMD_STOP_MEASURE:
+				stopMeasurement();
+				fillResponseFrame(STATE_STOP_MEASURE, CMD_STOP_MEASURE);
 				setFSMProtocolState(READY_STATE);
+				break;
+			case CMD_CRC_ANS_ERR:
+				sendPreviousResponse();
+				break;
 			}
 			break;
-		case CMD_RESET:
-			resetSensor();
-			fillResponseFrame(STATE_RESET, CMD_RESET);
-			setFSMProtocolState(CONNECTED_STATE);
-			break;
-		case CMD_START_MEASURE:
-			fillResponseFrame(STATE_START_MEASURE, CMD_START_MEASURE);
-			startMeasurement();
-			setFSMProtocolState(MEASUREMENT_EXCHANGE_STATE);
-			break;
-		case CMD_CRC_ANS_ERR:
-			sendPreviousResponse();
-			break;
-		}
-		break;
-	case MEASUREMENT_EXCHANGE_STATE:
-		// анализ полученной команды
-		switch (safe_command_frame[2]) {
-		case CMD_GET_MEASURE:
-			fillDataFrame();
-			break;
-		case CMD_STATUS:
-			if (meas_data_ready) { 		// данные для передачи уже готовы
-				fillResponseFrame(STATE_READY, CMD_STATUS);
-			} else {					// данных для передачи нет
-				fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
+		case EXCHANGE_STATE:
+			// анализ полученной команды
+			switch (safe_command_frame[2]) {
+			case CMD_GET_MEASURE:
+				fillDataFrame();
+				break;
+			case CMD_STATUS:
+				if (meas_data_ready) { 		// данные для передачи уже готовы
+					fillResponseFrame(STATE_READY, CMD_STATUS);
+				} else {					// данных для передачи нет
+					fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
+					setFSMProtocolState(READY_STATE);
+				}
+				break;
+			case CMD_RESET:
+				resetSensor();
+				fillResponseFrame(STATE_RESET, CMD_RESET);
+				setFSMProtocolState(CONNECTED_STATE);
+				break;
+			case CMD_START_MEASURE:
+				fillResponseFrame(STATE_START_MEASURE, CMD_START_MEASURE);
+				startMeasurement();
+				setFSMProtocolState(MEASUREMENT_EXCHANGE_STATE);
+				break;
+			case CMD_CRC_ANS_ERR:
+				sendPreviousResponse();
+				break;
 			}
 			break;
-		case CMD_RESET:
-			resetSensor();
-			fillResponseFrame(STATE_RESET, CMD_RESET);
-			FSM_state = CONNECTED_STATE;
-			break;
-		case CMD_STOP_MEASURE:
-			stopMeasurement();
-			fillResponseFrame(STATE_STOP_MEASURE, CMD_STOP_MEASURE);
-			setFSMProtocolState(EXCHANGE_STATE);
-			break;
-		case CMD_CRC_ANS_ERR:
-			sendPreviousResponse();
+		case MEASUREMENT_EXCHANGE_STATE:
+			// анализ полученной команды
+			switch (safe_command_frame[2]) {
+			case CMD_GET_MEASURE:
+				fillDataFrame();
+				break;
+			case CMD_STATUS:
+				if (meas_data_ready) { 		// данные для передачи уже готовы
+					fillResponseFrame(STATE_READY, CMD_STATUS);
+				} else {					// данных для передачи нет
+					fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
+					setFSMProtocolState(MEASUREMENT_STATE);
+				}
+				break;
+			case CMD_RESET:
+				resetSensor();
+				fillResponseFrame(STATE_RESET, CMD_RESET);
+				FSM_state = CONNECTED_STATE;
+				break;
+			case CMD_STOP_MEASURE:
+				stopMeasurement();
+				fillResponseFrame(STATE_STOP_MEASURE, CMD_STOP_MEASURE);
+				setFSMProtocolState(EXCHANGE_STATE);
+				break;
+			case CMD_CRC_ANS_ERR:
+				sendPreviousResponse();
+				break;
+			}
 			break;
 		}
-		break;
-	}
 };
 
 bool checkCRC32(uint8_t* command_frame, uint16_t length) {
