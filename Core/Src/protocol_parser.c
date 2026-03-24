@@ -23,7 +23,6 @@ uint16_t meas_request_cnt = 0;						// флаг запроса на выполн
 uint16_t sensor_state = STATE_NOT_READY;			// внутреннее состояние датчика (работоспособность)
 uint16_t measurement_state = STATE_NOT_READY;		// статус готовности результата измерения
 uint8_t FSM_state;									// текущее состояние FSM
-bool meas_data_ready = false;						// признак готовности измеренных данных
 uint8_t measurement_bytes_num = 0;					// число фактически готовых байт измерения
 
 // хранит информацию о страницах и позициях, которые были считаны с флеш
@@ -96,10 +95,10 @@ bool isAvailableNextMeasData() {
 
 	return 0;
 }
-/* Вовзращает признак готовности данных измерения (поле ответа данных - признак готовности данных)
- * 1 - есть хотя-бы один результат измерения
+/* Вовзращает количество готовых байт данных измерения в пределах одной страницы флеш-памяти
  * 0 - готовых измерений нет */
-bool isAvailableMeasData() {
+uint16_t getNumAvailableMeasData() {
+
 
 	return 0;
 }
@@ -182,12 +181,6 @@ void fillDataField() {
 	} else {
 		read.page_offset_read = curr_page_pos_ptr - 1;
 	}
-
-	/*
-	W25_Read_Page(data_buf, 0, 0, w25_info.PageSize);
-	for (uint16_t i = 0, k = 3; i < 256; i++, k++) {
-		response[k] = data_buf[i];
-	} */
 };
 
 /* Заполняет кадр ответа и уведомляет модуль SPI_connection о готовности ответа к отправке
@@ -203,7 +196,7 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 
 	if (command_code == CMD_STATUS) {
 		// установка признака наличия хотя бы одного готового результата измерения
-		response[3] = meas_data_ready;
+		response[3] = getNumAvailableMeasData();
 	}
 
 	// формирование CRC для кадра в порядке MSB
