@@ -17,7 +17,6 @@ extern w25_info_t  w25_info;
 /* раздел объявления переменных */
 
 uint8_t response[FRAME_LEN] = {0};
-uint8_t data_buf[256] = {0};						// буфер с данными измерения ( используется для заполнения поля данных в кадре ответа с данными)
 uint16_t meas_request_cnt = 0;						// флаг запроса на выполнение измерения
 uint16_t sensor_state = STATE_NOT_READY;			// внутреннее состояние датчика (работоспособность)
 uint16_t measurement_state = STATE_NOT_READY;		// статус готовности результата измерения
@@ -122,10 +121,11 @@ void fillDataFrame() {
 
 void fillDataField() {
 	// чтение страницы флеш-памяти в буфер с данными
+	/*
 	W25_Read_Page(data_buf, 0, 0, w25_info.PageSize);
 	for (uint16_t i = 0, k = 3; i < 256; i++, k++) {
 		response[k] = data_buf[i];
-	}
+	} */
 };
 
 /* Заполняет кадр ответа и уведомляет модуль SPI_connection о готовности ответа к отправке
@@ -345,50 +345,6 @@ void parserFSM() {
 		break;
 	}
 };
-/*
-void parser(uint8_t* command_frame) {
-	memcpy(safe_command_frame, command_frame, CONTROL_FRAME_LEN);
-	// проверка контрольной суммы
-	if(!checkCRC32(safe_command_frame, CONTROL_FRAME_LEN)) { 		// ошибка CRC
-		// формирование ответа - ошибка CRC
-		fillResponseFrame(CRC_ERROR);
-	} else {														// CRC верна
-		switch(safe_command_frame[2]) {
-			case CMD_GET_MEASURE:
-
-				break;
-			case CMD_STATUS:
-				if(meas_request_cnt != 0) { // запрос на измерение уже был
-					// сформировать ответ с состоянием готовности измерения
-					fillResponseFrame(measurement_state);
-				} else { // запроса на измерение не было
-					// выполнение проверки работоспособности датчика и обновление его статуса
-					sensor_state = sensorSelfCheck();
-					// формирование ответа
-					fillResponseFrame(sensor_state);
-				}
-				break;
-			case CMD_RESET:
-				sensor_state = STATE_RESET;
-				fillResponseFrame(sensor_state);
-				handleSensorReset();
-				break;
-			case CMD_START_MEASURE:
-				// установка состояния датчика - измерение и отправка ответа
-				sensor_state = STATE_START_MEASURE;
-				fillResponseFrame(sensor_state);
-				// увеличение счетчика запросов на измерение
-				meas_request_cnt++;
-				startMeasurement();
-				break;
-			case CRC_ERROR: // ведущим обнаружена ошибка CRC в ответе с результатом измерения
-				// повторная отправка результата измерения, принятого с ошибкой
-				sendLastDataResponse();
-				break;
-		}
-	}
-}
-*/
 
 bool checkCRC32(uint8_t* command_frame, uint16_t length) {
 	// получение CRC полученного кадра

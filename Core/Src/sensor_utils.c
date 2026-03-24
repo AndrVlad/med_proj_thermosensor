@@ -33,12 +33,12 @@ void resetSensor() {
 }
 
 void startMeasurement() {
-	need_save = 1;
+
 	return;
 }
 
 void stopMeasurement() {
-	need_save = 0;
+
 	return;
 }
 

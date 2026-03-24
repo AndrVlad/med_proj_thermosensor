@@ -35,7 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TEST_VER 1
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,12 +56,18 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 extern w25_info_t  w25_info;
 uint8_t rx_buf[1025];
+uint8_t data_buf[256];
 uint8_t tx_buf[10];
 extern volatile uint16_t ADC_data;
-uint8_t need_save = 0; // 0-idle, 1-save data
-volatile uint16_t buf_ptr = 0, page_ptr = 0;
+char need_save = 0; // 0-idle, 1-save data
+volatile uint16_t page_ptr = 0;
+volatile char new_conv = 0; //new ADC conversion done
 uint8_t res_buf[256] = {0};
+uint8_t page_pos_ptr = 0; //ptr to free pos in page in WORDS
+static float Krt_r25[10] = {4.232, 3.265, 2.539, 1.99, 1.571,
+                     1.249, 1.0, 0.8057, 0.6531, 0.5327};
 uint8_t dt1[10];
+float t; // temperature in C_deg*100
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,32 +79,20 @@ static void MX_ADC1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
-void sensorInit();
-void sendInitCTRL();
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-/* Инициализация датчика при его подключении */
-void sensorInit() {
-	// инициализация флеш-памяти
-	W25_Ini(0);
-	// инициализация SPI-соединения
-	initSPIConnection();
-	// отправка сигнала на CTRL для уведомления мастера о подключении датчика
-	sendInitCTRL();
-	// установка состояния датчика "датчик подключен"
-	setFSMProtocolState(CONNECTED_STATE);
-}
-/* Формирует сигнал CTRL для уведомления мастера о подключении датчика */
-void sendInitCTRL() {
-	return;
-}
-/* Формирует сигнал CTRL для уведомления мастера о получении команды */
-void sendRxCompleteCTRL() {
-	return;
+float power(float base, uint8_t pow)
+{
+  float res = 1;
+  for (int i = 0; i < pow; i++)
+  {
+    res *= pow;
+  }
+  return res;
 }
 
 /* USER CODE END 0 */
@@ -153,79 +147,82 @@ int main(void)
   {
 	  if (spi_rx_complete) { // команда от мастера полностью получена
 		  // отправка сигнала на CTRL для уведомления мастера о получении команды
-		  sendRxCompleteCTRL();
 		  spi_rx_complete = false;
 		  // разбор команды
 		  parserFSM();
 	  }
-/*	KSS Block begin
-    HAL_UART_Receive(&huart1,(uint8_t*)dt1,1,0x10);  //wait for cmd
-    //commands
-    if(dt1[0] == '0') //erase mem
-    {
+
+/*	KSS CODE BEGIN */
+
+	  if(dt1[0] == '0') //erase mem
+	  {
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
       W25_Erase_Chip();
+      page_pos_ptr = 0;
+      page_ptr = 0;/*
       uint8_t pData[5] = {"0!\r\n"};
-      HAL_UART_Transmit(&huart1, pData, 4, 100);
+      HAL_UART_Transmit(&huart1, pData, 4, 100);*/
     }
     if(dt1[0] == '1') //start measure
     {
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
-      need_save = 1;
+      need_save = 1;/*
       uint8_t pData[5] = {"1!\r\n"};
-      HAL_UART_Transmit(&huart1, pData, 4, 100);
+      HAL_UART_Transmit(&huart1, pData, 4, 100);*/
     }
     if(dt1[0] == '2') //stop measure
     {
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
-      need_save = 0;
+      need_save = 0;/*
       uint8_t pData[5] = {"2!\r\n"};
-      HAL_UART_Transmit(&huart1, pData, 4, 100);
+      HAL_UART_Transmit(&huart1, pData, 4, 100);*/
     }
     if(dt1[0] == '3') //read mem
     {
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
-      uint8_t data_buf[256];
-      W25_Read_Page(data_buf, 0, 0, w25_info.PageSize);
-      HAL_UART_Transmit(&huart1, data_buf, w25_info.PageSize, 100);
+      W25_Read_Page(data_buf, dt1[1], 0, w25_info.PageSize);
+      HAL_UART_Transmit(&huart1, data_buf, w25_info.PageSize, 100);/*
       uint8_t pData[7] = {"\r\n3!\r\n"};
-      HAL_UART_Transmit(&huart1, pData, 6, 100);
+      HAL_UART_Transmit(&huart1, pData, 6, 100);*/
     }
-    if(dt1[0] == '4') //test
-    {
-      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
-      uint8_t data_buf[256] = "qwertyuiopasdfgh";
-      uint8_t data_buf_1[256] = "1234567890";
-      for ( int i = 0; i < 3; i++)
-      {
-        W25_Write_Page(data_buf+i, 0, i, 1);
-        HAL_Delay(1);
-      }
-      for ( int i = 0; i < 256; i++)
-      {
-        W25_Write_Page(data_buf_1+i, 1, i, 1);
-        HAL_Delay(1);
-      }
-      uint8_t pData[7] = {"\r\n4!\r\n"};
-      HAL_UART_Transmit(&huart1, pData, 6, 100);
-    }
-    if(dt1[0] == '9') //get flash ID
-    {
-      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
-      W25_Ini(1);
-      uint8_t pData[5] = {"9!\r\n"};
-      HAL_UART_Transmit(&huart1, pData, 4, 100);
-    }
+
     dt1[0] = 0;
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET);
-    if ((need_save) && (buf_ptr > 255)) //!!CHECK
-    {
-      W25_Write_Page(res_buf, page_ptr, 0, w25_info.PageSize);
-      page_ptr++;
-      buf_ptr = 0;
-    }
-    HAL_Delay(1);
-    KSS Block end */
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET);
+	if ((need_save) && (new_conv == 1)) //measure ongoing and new conversion recieved from ADC
+	{
+	  static union
+	  {
+		uint16_t word;
+		uint8_t bytes[2];
+	  } result_data;
+
+	  new_conv = 0; //reset flag
+	  uint16_t code = ADC_data;
+	  float RT_R25 = (float)(code)/(float)(4095-code); //R_t/R25
+	  for ( int i = 9; i >= 0; i-- )
+	  {
+		if ( Krt_r25[i] >= RT_R25 ) //we are in true band
+		{
+		  float tga = 5/(Krt_r25[i+1] - Krt_r25[i]); //k = calc td(a)
+		  float b = (i-1)*5 - tga*Krt_r25[i]; // calc b = offset
+		  t = tga * RT_R25 + b;
+		  break;
+		}
+	  }
+	  result_data.word = (uint16_t)(t*100.0);
+	  W25_Write_Page(result_data.bytes, page_ptr, page_pos_ptr*2, 2); //save 2 bytes to flash
+	  page_pos_ptr++;
+	  if (page_pos_ptr == 127) //page is full
+	  {
+		page_ptr++;
+		page_pos_ptr = 0;
+	  }
+	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_2);
+	}
+	//HAL_Delay(1);
+
+/* KSS CODE END */
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -349,7 +346,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -420,9 +417,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 100;
+  htim3.Init.Prescaler = 65535;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 65535;
+  htim3.Init.Period = 30000;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -462,7 +459,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 256000;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;

@@ -60,7 +60,7 @@ extern ADC_HandleTypeDef hadc1;
 extern SPI_HandleTypeDef hspi2;
 /* USER CODE BEGIN EV */
 extern char res_buf[256];
-extern volatile uint16_t buf_ptr;
+extern volatile char new_conv;
 extern uint8_t need_save;
 /* USER CODE END EV */
 
@@ -208,15 +208,11 @@ void SysTick_Handler(void)
 void ADC1_2_IRQHandler(void)
 {
   /* USER CODE BEGIN ADC1_2_IRQn 0 */
-	  //TODO: Add check for ADC num!!!
-	  ADC_data = HAL_ADC_GetValue(&hadc1);
-	  if (need_save)
-	  {
-	    uint16_t x = ADC_data;
-	    x = (x>>4)&0x00FF;
-	    res_buf[buf_ptr] = x;
-	    buf_ptr++;
-	  }
+  ADC_data = HAL_ADC_GetValue(&hadc1);
+  if (need_save)
+  {
+	new_conv = 1; //set flag for new conversion
+  }
   /* USER CODE END ADC1_2_IRQn 0 */
   HAL_ADC_IRQHandler(&hadc1);
   /* USER CODE BEGIN ADC1_2_IRQn 1 */
