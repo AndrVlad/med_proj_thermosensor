@@ -52,6 +52,11 @@ void initSPIConnection() {
 	initResponseBuffer();
 };
 
+void resetSPIConnection() {
+	initSPIConnection();
+	response_ready = 0;
+}
+
 void initResponseBuffer() {
 	wait_response_frame[0] = 0xFA;
 	wait_response_frame[1] = 0xAF;

@@ -12,7 +12,7 @@
 #include "w25q_spi.h"
 #include "sensor_utils.h"
 
-#define LIMIT_PAGE_NUM 65536
+#define LIMIT_FLASH_PAGE_NUM 65536
 
 extern w25_info_t  w25_info;
 
@@ -28,8 +28,9 @@ uint8_t measurement_bytes_num = 0;					// число фактически гот
 // хранит информацию о страницах и позициях, которые были считаны с флеш
 struct {
 	uint8_t cur_page_num;		// номер текущей страницы с которой происходит чтение
-	uint8_t page_offset_read;	// смещение в словах (слово = 2 байта) которое было считано в последний раз
-} read = {.cur_page_num = 0, .page_offset_read = -1};
+	int8_t page_offset_read;	// смещение в словах (слово = 2 байта) которое было считано в последний раз
+	uint8_t num_ready_bytes; 	// число готовых для считывания данных в рамках текущей страницы
+} read = {.cur_page_num = 0, .page_offset_read = -1, .num_ready_bytes = 0};
 
 // рассчитанная таблица CRC-32
 const uint32_t crc32_table[256] = {
@@ -87,17 +88,9 @@ void sendInitCTRL();
 void sendRxCompleteCTRL();
 /* реализация функций */
 
-/* Вовзращает признак наличия готовых данных для измерения (поле пакета данных - признак наличия данных)
- * 1 - в текущем кадре будут отправлены не все данные измерения
- * 	(присутствуют еще данные, записанные в следующие страницы/страницу памяти)
- * 0 - готовых данных измерений больше нет */
-bool isAvailableNextMeasData() {
-
-	return 0;
-}
-/* Вовзращает количество готовых байт данных измерения в пределах одной страницы флеш-памяти
- * 0 - готовых измерений нет */
-uint16_t getNumAvailableMeasData() {
+/* Вычисляет количество готовых байт данных измерения в пределах одной страницы флеш-памяти
+ * и обновляет соответствующее поле структуры */
+void updateNumAvailableMeasData() {
 
 	uint8_t first_elem, curr_page_pos_ptr, curr_page_ptr;
 
@@ -109,9 +102,11 @@ uint16_t getNumAvailableMeasData() {
 
 	if (read.cur_page_num == curr_page_ptr &&				// если указатели записи и чтения на одной странице и совпадают
 			read.page_offset_read == curr_page_pos_ptr) {
-		return 0;
+		read.num_ready_bytes = 0;
+		return;
 	} else if (read.cur_page_num == curr_page_ptr && curr_page_pos_ptr == 0) {
-		return 0;
+		read.num_ready_bytes = 0;
+		return;
 	} else if (read.cur_page_num != curr_page_ptr) { 		// если указатель записи на другой странице
 
 		// будет выполняться чтение до конца текущей страницы
@@ -125,8 +120,8 @@ uint16_t getNumAvailableMeasData() {
 	} else {
 		first_elem = (read.page_offset_read + 1) * 2;
 	}
-
-	return (curr_page_pos_ptr * 2) - first_elem;
+	read.num_ready_bytes = (curr_page_pos_ptr * 2) - first_elem;
+	return;
 
 }
 
@@ -140,10 +135,11 @@ void fillDataFrame() {
 	memset(response,0,FRAME_LEN);
 	response[0] = 0xFA;
 	response[1] = 0xAA;
-	response[2] = isAvailableNextMeasData();
 	// заполнение поля данных
 	fillDataField();
-
+	// определение наличия следующих байт данных, для следующего запроса на получение данных
+	updateNumAvailableMeasData();
+	response[2] = read.num_ready_bytes;
 	response[258] = 0xFF;
 	response[259] = 0x0B;
 
@@ -163,26 +159,10 @@ void fillDataFrame() {
 
 void fillDataField() {
 
-	uint8_t first_elem, last_elem, curr_page_pos_ptr, curr_page_ptr;
+	uint8_t first_elem, last_elem;
 
-	// сохранение последнего значения смещения записанных байт в странице
-	curr_page_pos_ptr = page_pos_ptr;
-
-	// сохранение последнего номера страницы, используемого для записи
-	curr_page_ptr = page_ptr;
-
-	// определение страницы флеш-памяти, которую необходимо считать
-	if (read.page_offset_read == 126) { 				// страница считана полностью
-		if (cur_page_num == LIMIT_FLASH_PAGE_NUM - 1) { // текущая считанная страница последняя во флеш-памяти
-			read.cur_page_num = 0;
-		} else {
-			read.cur_page_num++;
-		}
-	}
-
-	// определение в какой странице находится текущее смещение записанных байт флеш-памяти
-	if (read.cur_page_num != page_ptr) { 	// если указатель записанных байт на другой странице
-		curr_page_pos_ptr = 127; 			// будет выполняться чтение до конца текущей страницы
+	if (read.num_ready_bytes == 0) {
+		return;
 	}
 
 	// чтение страницы флеш-памяти в буфер с данными
@@ -196,17 +176,27 @@ void fillDataField() {
     	first_elem = (read.page_offset_read + 1) * 2;
     }
 
-    // определение последнего номера байта, который необходимо записать в поле данных
-    last_elem = (curr_page_pos_ptr * 2) - 1;
+    // определение последнего номера элемента страницы, до которого необходимо выполнять считывание страницы
+    last_elem = first_elem + read.num_ready_bytes - 1;
 
 	for (uint16_t k = 3, i = first_elem; i <= last_elem; i++, k++) {
 		response[k] = data_buf[i];
 	}
-	// сохранение номера последнего считанного слова страницы
+
+	// обновление номера последнего считанного слова страницы
 	if (read.page_offset_read == -1) {
-		read.page_offset_read = 0;
+		read.page_offset_read = (read.num_ready_bytes / 2) - 1;
 	} else {
-		read.page_offset_read = curr_page_pos_ptr - 1;
+		read.page_offset_read += (read.num_ready_bytes / 2);
+	}
+
+	// обновление номера страницы флеш-памяти, которая будет считана в следующий раз если текущая считана полностью
+	if (read.page_offset_read == 126) {
+		if (read.cur_page_num == LIMIT_FLASH_PAGE_NUM - 1) { // текущая считанная страница последняя во флеш-памяти
+			read.cur_page_num = 0;
+		} else {
+			read.cur_page_num++;
+		}
 	}
 };
 
@@ -223,7 +213,7 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 
 	if (command_code == CMD_STATUS) {
 		// определение числа готовых данных измерения
-		response[3] = getNumAvailableMeasData();
+		response[3] = read.num_ready_bytes;
 	}
 
 	// формирование CRC для кадра в порядке MSB
@@ -256,13 +246,15 @@ void sendPreviousResponse() {
 void updateSavedResponse(uint8_t* response) {
 
 	// определение типа сохраненного кадра ответа
-	if (response[1] == 0xAA) { // кадр ответа с данными (проверка 2-го байта старт-слова)
-		// обновление признака наличия данных измерения помимо текущего пакета с данными
-		response[2] = isAvailableMeasData();
+	if (response[1] == 0xAA) { // сохраненный кадр - кадр ответа с данными (проверка 2-го байта старт-слова)
+		// обновления наличия следующих байт данных, для следующего запроса на получение данных
+		updateNumAvailableMeasData();
+		response[2] = read.num_ready_bytes;
 	} else {	// кадр ответа на команду
 		if (response[2] == CMD_STATUS) {
-			// обновление признака наличия хотя бы одного готового результата измерения
-			response[3] = meas_data_ready;
+			// обновление признака наличия результатов измерения
+			updateNumAvailableMeasData();
+			response[3] = read.num_ready_bytes;
 		}
 	}
 
@@ -291,7 +283,9 @@ void parserFSM() {
 			switch (safe_command_frame[2]) {
 			case CMD_STATUS:
 				if (sensorSelfCheck()) { 		// самопроверка датчика выполнилась успешно
-					if (meas_data_ready) { 		// данные для передачи уже готовы
+					// обновление числа готовых для измерения
+					updateNumAvailableMeasData();
+					if (read.num_ready_bytes != 0) { 		// данные для передачи уже готовы
 						setFSMProtocolState(EXCHANGE_STATE);
 					} else {					// данных для передачи нет
 						setFSMProtocolState(READY_STATE);
@@ -315,7 +309,9 @@ void parserFSM() {
 			switch (safe_command_frame[2]) {
 			case CMD_STATUS:
 				if (sensorSelfCheck()) { 		// самопроверка датчика выполнилась успешно
-					if (meas_data_ready) { 		// данные для передачи уже готовы
+					// обновление числа готовых для измерения
+					updateNumAvailableMeasData();
+					if (read.num_ready_bytes != 0) { 		// данные для передачи уже готовы
 						setFSMProtocolState(EXCHANGE_STATE);
 					} else {					// данных для передачи нет
 						setFSMProtocolState(READY_STATE);
@@ -347,7 +343,9 @@ void parserFSM() {
 				setFSMProtocolState(MEASUREMENT_EXCHANGE_STATE);
 				break;
 			case CMD_STATUS:
-				if (meas_data_ready) { 		// данные для передачи уже готовы
+				// обновление числа готовых для измерения
+				updateNumAvailableMeasData();
+				if (read.num_ready_bytes != 0) { 		// данные для передачи уже готовы
 					fillResponseFrame(STATE_READY, CMD_STATUS);
 				} else {					// данных для передачи нет
 					fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
@@ -375,7 +373,9 @@ void parserFSM() {
 				fillDataFrame();
 				break;
 			case CMD_STATUS:
-				if (meas_data_ready) { 		// данные для передачи уже готовы
+				// обновление числа готовых для измерения
+				updateNumAvailableMeasData();
+				if (read.num_ready_bytes != 0) { 		// данные для передачи уже готовы
 					fillResponseFrame(STATE_READY, CMD_STATUS);
 				} else {					// данных для передачи нет
 					fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
@@ -404,7 +404,9 @@ void parserFSM() {
 				fillDataFrame();
 				break;
 			case CMD_STATUS:
-				if (meas_data_ready) { 		// данные для передачи уже готовы
+				// обновление числа готовых для измерения
+				updateNumAvailableMeasData();
+				if (read.num_ready_bytes != 0) { 		// данные для передачи уже готовы
 					fillResponseFrame(STATE_READY, CMD_STATUS);
 				} else {					// данных для передачи нет
 					fillResponseFrame(STATE_NOT_READY, CMD_STATUS);
@@ -471,5 +473,12 @@ void sendInitCTRL() {
 /* Формирует сигнал CTRL для уведомления мастера о получении команды */
 void sendRxCompleteCTRL() {
 	return;
+}
+
+void resetFSMProtocol() {
+	setFSMProtocolState(CONNECTED_STATE);
+	read.cur_page_num = 0;
+	read.page_offset_read = -1;
+	read.num_ready_bytes = 0;
 }
 

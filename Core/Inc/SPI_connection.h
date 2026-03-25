@@ -22,5 +22,6 @@ extern uint8_t safe_command_frame[264];
 extern uint8_t* new_response_frame;
 
 void initSPIConnection();
+void resetSPIConnection();
 
 #endif /* INC_SPI_CONNECTION_H_ */

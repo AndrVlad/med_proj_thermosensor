@@ -1,0 +1,14 @@
+../Core/Src/protocol_parser.c:93:6:updateNumAvailableMeasData	16	static
+../Core/Src/protocol_parser.c:128:6:setFSMProtocolState	16	static
+../Core/Src/protocol_parser.c:133:6:fillDataFrame	16	static
+../Core/Src/protocol_parser.c:160:6:fillDataField	16	static
+../Core/Src/protocol_parser.c:206:6:fillResponseFrame	24	static
+../Core/Src/protocol_parser.c:233:6:sendPreviousResponse	8	static
+../Core/Src/protocol_parser.c:246:6:updateSavedResponse	24	static
+../Core/Src/protocol_parser.c:270:6:parserFSM	8	static
+../Core/Src/protocol_parser.c:434:6:checkCRC32	24	static
+../Core/Src/protocol_parser.c:451:10:calculateCRC32	24	static
+../Core/Src/protocol_parser.c:459:6:sensorInit	8	static
+../Core/Src/protocol_parser.c:470:6:sendInitCTRL	4	static
+../Core/Src/protocol_parser.c:474:6:sendRxCompleteCTRL	4	static
+../Core/Src/protocol_parser.c:478:6:resetFSMProtocol	8	static
