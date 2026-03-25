@@ -12,7 +12,7 @@
 #include "w25q_spi.h"
 #include "sensor_utils.h"
 
-#define LIMIT_PAGE_NUM 524288
+#define LIMIT_PAGE_NUM 65536
 
 extern w25_info_t  w25_info;
 
@@ -99,8 +99,35 @@ bool isAvailableNextMeasData() {
  * 0 - готовых измерений нет */
 uint16_t getNumAvailableMeasData() {
 
+	uint8_t first_elem, curr_page_pos_ptr, curr_page_ptr;
 
-	return 0;
+	// сохранение последнего значения смещения записанных байт в странице
+	curr_page_pos_ptr = page_pos_ptr;
+
+	// сохранение последнего номера страницы, используемого для записи
+	curr_page_ptr = page_ptr;
+
+	if (read.cur_page_num == curr_page_ptr &&				// если указатели записи и чтения на одной странице и совпадают
+			read.page_offset_read == curr_page_pos_ptr) {
+		return 0;
+	} else if (read.cur_page_num == curr_page_ptr && curr_page_pos_ptr == 0) {
+		return 0;
+	} else if (read.cur_page_num != curr_page_ptr) { 		// если указатель записи на другой странице
+
+		// будет выполняться чтение до конца текущей страницы
+		curr_page_pos_ptr = 127;
+	}
+
+	// общий случай: если номер последней считанной страницы совпадает с номером страницы, куда выполнялась запись
+	// определение первого элемента страницы, начиная с которого в странице находятся готовые данные
+	if (read.page_offset_read == -1) {
+		first_elem = 0;
+	} else {
+		first_elem = (read.page_offset_read + 1) * 2;
+	}
+
+	return (curr_page_pos_ptr * 2) - first_elem;
+
 }
 
 void setFSMProtocolState(uint8_t state) {
@@ -146,7 +173,7 @@ void fillDataField() {
 
 	// определение страницы флеш-памяти, которую необходимо считать
 	if (read.page_offset_read == 126) { 				// страница считана полностью
-		if (cur_page_num == LIMIT_FLASH_PAGE_NUM) { // текущая считанная страница последняя
+		if (cur_page_num == LIMIT_FLASH_PAGE_NUM - 1) { // текущая считанная страница последняя во флеш-памяти
 			read.cur_page_num = 0;
 		} else {
 			read.cur_page_num++;
@@ -195,7 +222,7 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 	response[2] = response_code;
 
 	if (command_code == CMD_STATUS) {
-		// установка признака наличия хотя бы одного готового результата измерения
+		// определение числа готовых данных измерения
 		response[3] = getNumAvailableMeasData();
 	}
 
