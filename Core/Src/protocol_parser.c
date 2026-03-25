@@ -143,6 +143,8 @@ void fillDataFrame() {
 	response[258] = 0xFF;
 	response[259] = 0x0B;
 
+	response[257] = FSM_state;
+
 	// формирование CRC для кадра в порядке MSB
 	uint32_t crc = calculateCRC32(response,FRAME_LEN);
 	response[260] = (crc >> 24) & 0xFF;
@@ -215,7 +217,7 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 		// определение числа готовых данных измерения
 		response[3] = read.num_ready_bytes;
 	}
-
+	response[257] = FSM_state;
 	// формирование CRC для кадра в порядке MSB
 	uint32_t crc = calculateCRC32(response,FRAME_LEN);
 	response[260] = (crc >> 24) & 0xFF;
