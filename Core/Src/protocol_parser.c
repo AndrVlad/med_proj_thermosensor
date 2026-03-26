@@ -200,6 +200,8 @@ void fillDataField() {
 		} else {
 			read.cur_page_num++;
 		}
+		// выполняется сброс смещения для чтения, поскольку было прочитано последнее слово страницы флеш-памяти
+		read.page_offset_read = -1;
 	}
 };
 
@@ -218,7 +220,14 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 		// определение числа готовых данных измерения
 		response[3] = read.num_ready_bytes;
 	}
+
+	// для отладки
+	response[253] = page_ptr;
+	response[254] = read.cur_page_num;
+	response[255] = page_pos_ptr;
+	response[256] = read.page_offset_read;
 	response[257] = FSM_state;
+
 	response[258] = 0xFF;
 	response[259] = 0x0D;
 	// формирование CRC для кадра в порядке MSB
