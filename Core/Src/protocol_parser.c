@@ -24,6 +24,7 @@ uint16_t sensor_state = STATE_NOT_READY;			// внутреннее состоя�
 uint16_t measurement_state = STATE_NOT_READY;		// статус готовности результата измерения
 uint8_t FSM_state;									// текущее состояние FSM
 uint8_t measurement_bytes_num = 0;					// число фактически готовых байт измерения
+bool reset_ready = 0;
 
 // хранит информацию о страницах и позициях, которые были считаны с флеш
 struct {
@@ -218,6 +219,8 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 		response[3] = read.num_ready_bytes;
 	}
 	response[257] = FSM_state;
+	response[258] = 0xFF;
+	response[259] = 0x0D;
 	// формирование CRC для кадра в порядке MSB
 	uint32_t crc = calculateCRC32(response,FRAME_LEN);
 	response[260] = (crc >> 24) & 0xFF;
@@ -299,7 +302,6 @@ void parserFSM() {
 				break;
 			case CMD_RESET:
 				resetSensor();
-				fillResponseFrame(STATE_RESET, CMD_RESET);
 				break;
 			case CMD_CRC_ANS_ERR:
 				sendPreviousResponse();
@@ -325,8 +327,6 @@ void parserFSM() {
 				break;
 			case CMD_RESET:
 				resetSensor();
-				fillResponseFrame(STATE_RESET, CMD_RESET);
-				setFSMProtocolState(CONNECTED_STATE);
 				break;
 			case CMD_START_MEASURE:
 				fillResponseFrame(STATE_START_MEASURE, CMD_START_MEASURE);
@@ -355,8 +355,6 @@ void parserFSM() {
 				break;
 			case CMD_RESET:
 				resetSensor();
-				fillResponseFrame(STATE_RESET, CMD_RESET);
-				setFSMProtocolState(CONNECTED_STATE);
 				break;
 			case CMD_STOP_MEASURE:
 				stopMeasurement();
@@ -386,8 +384,6 @@ void parserFSM() {
 				break;
 			case CMD_RESET:
 				resetSensor();
-				fillResponseFrame(STATE_RESET, CMD_RESET);
-				setFSMProtocolState(CONNECTED_STATE);
 				break;
 			case CMD_START_MEASURE:
 				fillResponseFrame(STATE_START_MEASURE, CMD_START_MEASURE);
@@ -417,8 +413,6 @@ void parserFSM() {
 				break;
 			case CMD_RESET:
 				resetSensor();
-				fillResponseFrame(STATE_RESET, CMD_RESET);
-				FSM_state = CONNECTED_STATE;
 				break;
 			case CMD_STOP_MEASURE:
 				stopMeasurement();
@@ -430,7 +424,19 @@ void parserFSM() {
 				break;
 			}
 			break;
-		}
+		case RESET_STATE:
+			if(safe_command_frame[2] == CMD_STATUS) {
+				if (reset_ready) {
+					HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET);
+					fillResponseFrame(STATE_RESET, CMD_RESET);
+					setFSMProtocolState(CONNECTED_STATE);
+					reset_ready = 0;
+				} else {
+					response_ready = 0;
+				}
+			}
+
+	}
 };
 
 bool checkCRC32(uint8_t* command_frame, uint16_t length) {
@@ -478,9 +484,10 @@ void sendRxCompleteCTRL() {
 }
 
 void resetFSMProtocol() {
-	setFSMProtocolState(CONNECTED_STATE);
+	setFSMProtocolState(RESET_STATE);
 	read.cur_page_num = 0;
 	read.page_offset_read = -1;
 	read.num_ready_bytes = 0;
+	response_ready = 0;
 }
 

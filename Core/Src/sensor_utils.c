@@ -28,11 +28,8 @@ bool sensorSelfCheck() {
 
 /* Выполняет сброс датчика */
 void resetSensor() {
-	// очистка флеш-памяти
-    W25_Erase_Chip();
 
-    // сброс SPI-соединения с мастером
-    resetSPIConnection();
+	stopMeasurement();
 
     // сброс внутреннего состояния датчика
     resetFSMProtocol();
@@ -40,6 +37,17 @@ void resetSensor() {
     // сброс переменных
     page_pos_ptr = 0;
     page_ptr = 0;
+
+	// очистка флеш-памяти
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
+    W25_Erase_Chip();
+
+    reset_ready = true;
+
+    // сброс SPI-соединения с мастером
+    //resetSPIConnection();
+
+
 	return;
 }
 /* Запуск измерения */
