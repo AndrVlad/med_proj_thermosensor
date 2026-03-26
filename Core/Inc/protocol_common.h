@@ -2,7 +2,7 @@
  * protocol_common.h
  *
  *  Created on: Mar 12, 2026
- *      Author: vlado
+ *      Author: AVA
  */
 
 #ifndef INC_PROTOCOL_COMMON_H_

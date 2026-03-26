@@ -28,7 +28,7 @@ bool reset_ready = 0;
 
 // хранит информацию о страницах и позициях, которые были считаны с флеш
 struct {
-	uint8_t cur_page_num;		// номер текущей страницы с которой происходит чтение
+	uint8_t cur_page_num;     		// номер текущей страницы с которой происходит чтение
 	int8_t page_offset_read;	// смещение в словах (слово = 2 байта) которое было считано в последний раз
 	uint8_t num_ready_bytes; 	// число готовых для считывания данных в рамках текущей страницы
 } read = {.cur_page_num = 0, .page_offset_read = -1, .num_ready_bytes = 0};
@@ -147,7 +147,7 @@ void fillDataFrame() {
 	response[257] = FSM_state;
 
 	// формирование CRC для кадра в порядке MSB
-	uint32_t crc = calculateCRC32(response,FRAME_LEN);
+	uint32_t crc = calculateCRC32(response,FRAME_LEN-4);
 	response[260] = (crc >> 24) & 0xFF;
 	response[261] = (crc >> 16) & 0xFF;
 	response[262] = (crc >> 8) & 0xFF;
@@ -231,7 +231,7 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 	response[258] = 0xFF;
 	response[259] = 0x0D;
 	// формирование CRC для кадра в порядке MSB
-	uint32_t crc = calculateCRC32(response,FRAME_LEN);
+	uint32_t crc = calculateCRC32(response,FRAME_LEN-4);
 	response[260] = (crc >> 24) & 0xFF;
 	response[261] = (crc >> 16) & 0xFF;
 	response[262] = (crc >> 8) & 0xFF;
@@ -273,7 +273,7 @@ void updateSavedResponse(uint8_t* response) {
 	}
 
 	// формирование CRC для кадра в порядке MSB
-	uint32_t crc = calculateCRC32(response,FRAME_LEN);
+	uint32_t crc = calculateCRC32(response,FRAME_LEN-4);
 	response[260] = (crc >> 24) & 0xFF;
 	response[261] = (crc >> 16) & 0xFF;
 	response[262] = (crc >> 8) & 0xFF;
@@ -456,7 +456,7 @@ bool checkCRC32(uint8_t* command_frame, uint16_t length) {
 							((uint32_t)command_frame[260] << 24);
 
 	// расчет ожидаемой CRC для полученного кадра
-	uint32_t calc_crc = calculateCRC32(command_frame, FRAME_LEN);
+	uint32_t calc_crc = calculateCRC32(command_frame, FRAME_LEN-4);
 	// сравнение полученной и ожидаемой CRC
 	if (command_crc != calc_crc) {
 		return false;
