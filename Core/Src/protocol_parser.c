@@ -13,6 +13,7 @@
 #include "sensor_utils.h"
 
 #define LIMIT_FLASH_PAGE_NUM 65536
+//#define TEST_VER
 
 extern w25_info_t  w25_info;
 
@@ -282,10 +283,10 @@ void updateSavedResponse(uint8_t* response) {
 }
 
 void parserFSM() {
-#ifdef TEST_VER
+#ifndef TEST_VER
 	sendRxCompleteCTRL();
 	// проверка контрольной суммы
-	if(!checkCRC32(safe_command_frame, FRAME_LEN)) {
+	if(!checkCRC32(safe_command_frame, FRAME_LEN-4)) {
 		// формирование ответа - ошибка CRC
 		fillResponseFrame(CRC_ERROR, 0);
 		return;

@@ -146,7 +146,6 @@ int main(void)
   while (1)
   {
 	  if (spi_rx_complete) { // команда от мастера полностью получена
-		  // отправка сигнала на CTRL для уведомления мастера о получении команды
 		  spi_rx_complete = false;
 		  // разбор команды
 		  parserFSM();
