@@ -486,10 +486,15 @@ void sensorInit() {
 }
 /* Формирует сигнал CTRL для уведомления мастера о подключении датчика */
 void sendInitCTRL() {
+	HAL_TIM_OnePulse_Start(&htim2, TIM_CHANNEL_1);
 	return;
 }
 /* Формирует сигнал CTRL для уведомления мастера о получении команды */
 void sendRxCompleteCTRL() {
+
+	__HAL_TIM_ENABLE(&htim2);
+	//HAL_TIM_OnePulse_Start(&htim2, TIM_CHANNEL_1,TIM_CHANNEL_1);
+	//HAL_TIM_GenerateEvent(&htim2, TIM_EVENTSOURCE_TRIGGER);
 	return;
 }
 

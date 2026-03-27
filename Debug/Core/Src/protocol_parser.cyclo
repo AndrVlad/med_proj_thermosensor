@@ -10,5 +10,5 @@ protocol_parser.c:452:6:checkCRC32	2
 protocol_parser.c:469:10:calculateCRC32	2
 protocol_parser.c:477:6:sensorInit	1
 protocol_parser.c:488:6:sendInitCTRL	1
-protocol_parser.c:492:6:sendRxCompleteCTRL	1
-protocol_parser.c:496:6:resetFSMProtocol	1
+protocol_parser.c:493:6:sendRxCompleteCTRL	1
+protocol_parser.c:501:6:resetFSMProtocol	1
