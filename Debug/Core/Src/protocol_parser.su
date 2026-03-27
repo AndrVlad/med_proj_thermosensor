@@ -9,6 +9,6 @@
 ../Core/Src/protocol_parser.c:452:6:checkCRC32	24	static
 ../Core/Src/protocol_parser.c:469:10:calculateCRC32	24	static
 ../Core/Src/protocol_parser.c:477:6:sensorInit	8	static
-../Core/Src/protocol_parser.c:488:6:sendInitCTRL	8	static
-../Core/Src/protocol_parser.c:493:6:sendRxCompleteCTRL	4	static
-../Core/Src/protocol_parser.c:501:6:resetFSMProtocol	8	static
+../Core/Src/protocol_parser.c:493:6:sendInitCTRL	4	static
+../Core/Src/protocol_parser.c:498:6:sendRxCompleteCTRL	4	static
+../Core/Src/protocol_parser.c:504:6:resetFSMProtocol	8	static

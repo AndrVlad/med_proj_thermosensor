@@ -479,6 +479,11 @@ void sensorInit() {
 	W25_Ini(0);
 	// инициализация SPI-соединения
 	initSPIConnection();
+
+	// включение таймера формирования сигнала CTRL
+	HAL_TIM_OnePulse_Start(&htim2, TIM_CHANNEL_1);
+	// задержка для удержания линии в активном уровне
+	HAL_Delay(1);
 	// отправка сигнала на CTRL для уведомления мастера о подключении датчика
 	sendInitCTRL();
 	// установка состояния датчика "датчик подключен"
@@ -486,15 +491,13 @@ void sensorInit() {
 }
 /* Формирует сигнал CTRL для уведомления мастера о подключении датчика */
 void sendInitCTRL() {
-	HAL_TIM_OnePulse_Start(&htim2, TIM_CHANNEL_1);
+	__HAL_TIM_ENABLE(&htim2);
 	return;
 }
 /* Формирует сигнал CTRL для уведомления мастера о получении команды */
 void sendRxCompleteCTRL() {
 
 	__HAL_TIM_ENABLE(&htim2);
-	//HAL_TIM_OnePulse_Start(&htim2, TIM_CHANNEL_1,TIM_CHANNEL_1);
-	//HAL_TIM_GenerateEvent(&htim2, TIM_EVENTSOURCE_TRIGGER);
 	return;
 }
 
