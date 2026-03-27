@@ -18,7 +18,7 @@ bool need_selfcheck = 0;
 
 static float Krt_r25[10] = {4.232, 3.265, 2.539, 1.99, 1.571,
                      1.249, 1.0, 0.8057, 0.6531, 0.5327};
-
+float temp_val = 0;
 float getTempVal() {
 
 	float RT_R25 = (float)(ADC_data_safe)/(float)(4095-ADC_data_safe); //R_t/R25
@@ -54,12 +54,12 @@ bool sensorSelfCheck() {
 		need_selfcheck = 0;
 		return false;
 	}
-	float temp_val = getTempVal();
+	temp_val = getTempVal();
 	if (temp_val < 30.0f || temp_val > 50.0f) {
 		need_selfcheck = 0;
 		return false;
 	}
-
+	need_selfcheck = 0;
 	return true;
 }
 
