@@ -139,6 +139,8 @@ int main(void)
   // инициализация датчика
   sensorInit();
 
+  // задание значения счетчика для получения данных с АЦП сразу после включения
+  __HAL_TIM_SET_COUNTER(&htim3, 29000);
   HAL_TIM_Base_Start(&htim3); //start timer for ADC
   HAL_ADC_Start_IT(&hadc1);
   HAL_ADC_PollForConversion(&hadc1, 100);
@@ -574,7 +576,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(SPI2_CS_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */

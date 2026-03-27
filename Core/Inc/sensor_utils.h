@@ -9,6 +9,10 @@
 #define INC_SENSOR_UTILS_H_
 #include <stdbool.h>
 
+// раскомментировать, если необходимо выключить самопроверку датчика - sensorSelfCheck()
+// (всегда будет возвращать true)
+//#define TEST_VERSION
+
 bool sensorSelfCheck();
 void resetSensor();
 void startMeasurement();
