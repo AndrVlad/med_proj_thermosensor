@@ -213,6 +213,9 @@ void ADC1_2_IRQHandler(void)
   {
 	new_conv = 1; //set flag for new conversion
   }
+  if (!need_selfcheck) {
+	  ADC_data_safe = ADC_data;
+  }
   /* USER CODE END ADC1_2_IRQn 0 */
   HAL_ADC_IRQHandler(&hadc1);
   /* USER CODE BEGIN ADC1_2_IRQn 1 */

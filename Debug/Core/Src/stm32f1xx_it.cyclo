@@ -7,6 +7,6 @@ stm32f1xx_it.c:148:6:SVC_Handler	1
 stm32f1xx_it.c:161:6:DebugMon_Handler	1
 stm32f1xx_it.c:174:6:PendSV_Handler	1
 stm32f1xx_it.c:187:6:SysTick_Handler	1
-stm32f1xx_it.c:208:6:ADC1_2_IRQHandler	2
-stm32f1xx_it.c:226:6:SPI2_IRQHandler	1
-stm32f1xx_it.c:240:6:EXTI15_10_IRQHandler	1
+stm32f1xx_it.c:208:6:ADC1_2_IRQHandler	3
+stm32f1xx_it.c:229:6:SPI2_IRQHandler	1
+stm32f1xx_it.c:243:6:EXTI15_10_IRQHandler	1

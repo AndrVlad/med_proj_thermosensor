@@ -32,6 +32,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "string.h"
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -76,6 +77,8 @@ extern uint8_t data_buf[256];
 extern uint8_t dt1[10];
 extern uint8_t page_pos_ptr ;
 extern volatile uint16_t page_ptr;
+extern volatile uint16_t ADC_data_safe;
+extern bool need_selfcheck;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
