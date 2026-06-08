@@ -571,7 +571,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : SPI2_CS_Pin */
   GPIO_InitStruct.Pin = SPI2_CS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(SPI2_CS_GPIO_Port, &GPIO_InitStruct);
 
