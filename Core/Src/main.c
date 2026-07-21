@@ -26,6 +26,7 @@
 #include "w25q_spi.h"
 #include "SPI_connection.h"
 #include "protocol_parser.h"
+#include "exp_protocol.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +50,7 @@ ADC_HandleTypeDef hadc1;
 SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi2;
 
+TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
@@ -56,6 +58,7 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 extern w25_info_t  w25_info;
+bool need_to_send = false;
 uint8_t rx_buf[1025];
 uint8_t data_buf[256];
 uint8_t tx_buf[10];
@@ -80,6 +83,7 @@ static void MX_ADC1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -95,6 +99,32 @@ float power(float base, uint8_t pow)
     res *= pow;
   }
   return res;
+}
+
+uint16_t getTemperature(uint16_t ADC_data) {
+
+	static union
+	{
+		uint16_t word;
+		uint8_t bytes[2];
+	} result_data;
+
+	float RT_R25 = (float)(ADC_data)/(float)(4095-ADC_data); //R_t/R25
+	float t = 0;
+	for ( int i = 9; i >= 0; i-- )
+	{
+		if ( Krt_r25[i] >= RT_R25 ) //we are in true band
+		{
+		float tga = 5/(Krt_r25[i+1] - Krt_r25[i]); //k = calc td(a)
+		float b = (i-1)*5 - tga*Krt_r25[i]; // calc b = offset
+		t = tga * RT_R25 + b;
+		break;
+		}
+	}
+
+	result_data.word = (uint16_t)(t*100.0);
+
+	return result_data.word;
 }
 
 /* USER CODE END 0 */
@@ -133,31 +163,38 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM3_Init();
   MX_TIM2_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3 | GPIO_PIN_4, GPIO_PIN_SET);
-
-  // инициализация датчика
-  sensorInit();
-
   // задание значения счетчика для получения данных с АЦП сразу после включения
-  __HAL_TIM_SET_COUNTER(&htim3, 29000);
-  HAL_TIM_Base_Start(&htim3); //start timer for ADC
+  __HAL_TIM_SET_COUNTER(&htim3, 4998);
+
   HAL_ADC_Start_IT(&hadc1);
-  HAL_ADC_PollForConversion(&hadc1, 100);
+
+  uart_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  /*
 	  if (spi_rx_complete) { // команда от мастера полностью получена
 		  spi_rx_complete = false;
 		  // разбор команды
 		  parserFSM();
-	  }
+	  } */
+
+	 if (uart1_rx_complete) {
+		 parser_exp();
+	 }
+
+	 if (need_to_send) {
+		 need_to_send = false;
+		 send_data(getTemperature(ADC_data_safe));
+	 }
 
 /*	KSS CODE BEGIN */
-
+	 /*
 	  if(dt1[0] == '0') //erase mem
 	  {
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
@@ -165,21 +202,21 @@ int main(void)
       page_pos_ptr = 0;
       page_ptr = 0;/*
       uint8_t pData[5] = {"0!\r\n"};
-      HAL_UART_Transmit(&huart1, pData, 4, 100);*/
+      HAL_UART_Transmit(&huart1, pData, 4, 100);
     }
     if(dt1[0] == '1') //start measure
     {
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
       need_save = 1;/*
       uint8_t pData[5] = {"1!\r\n"};
-      HAL_UART_Transmit(&huart1, pData, 4, 100);*/
+      HAL_UART_Transmit(&huart1, pData, 4, 100);
     }
     if(dt1[0] == '2') //stop measure
     {
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
       need_save = 0;/*
       uint8_t pData[5] = {"2!\r\n"};
-      HAL_UART_Transmit(&huart1, pData, 4, 100);*/
+      HAL_UART_Transmit(&huart1, pData, 4, 100);
     }
     if(dt1[0] == '3') //read mem
     {
@@ -187,11 +224,9 @@ int main(void)
       W25_Read_Page(data_buf, dt1[1], 0, w25_info.PageSize);
       HAL_UART_Transmit(&huart1, data_buf, w25_info.PageSize, 100);/*
       uint8_t pData[7] = {"\r\n3!\r\n"};
-      HAL_UART_Transmit(&huart1, pData, 6, 100);*/
-    }
+      HAL_UART_Transmit(&huart1, pData, 6, 100);
+    } */
 
-    dt1[0] = 0;
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET);
 	if ((need_save) && (new_conv == 1)) //measure ongoing and new conversion recieved from ADC
 	{
 	  static union
@@ -403,6 +438,52 @@ static void MX_SPI2_Init(void)
 }
 
 /**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 7199;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 9;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
+
+}
+
+/**
   * @brief TIM2 Initialization Function
   * @param None
   * @retval None
@@ -486,7 +567,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 65535;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 30000;
+  htim3.Init.Period = 5000;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -526,7 +607,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 256000;
+  huart1.Init.BaudRate = 250000;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;

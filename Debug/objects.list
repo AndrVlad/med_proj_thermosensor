@@ -1,4 +1,6 @@
 "./Core/Src/SPI_Connection.o"
+"./Core/Src/exp_measurement.o"
+"./Core/Src/exp_protocol.o"
 "./Core/Src/main.o"
 "./Core/Src/protocol_parser.o"
 "./Core/Src/sensor_utils.o"

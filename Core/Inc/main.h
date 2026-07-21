@@ -80,6 +80,7 @@ extern volatile uint16_t page_ptr;
 extern volatile uint16_t ADC_data_safe;
 extern bool need_selfcheck;
 extern ADC_HandleTypeDef hadc1;
+extern bool need_to_send;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

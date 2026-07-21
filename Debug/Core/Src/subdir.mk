@@ -6,6 +6,8 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Core/Src/SPI_Connection.c \
+../Core/Src/exp_measurement.c \
+../Core/Src/exp_protocol.c \
 ../Core/Src/main.c \
 ../Core/Src/protocol_parser.c \
 ../Core/Src/sensor_utils.c \
@@ -17,6 +19,8 @@ C_SRCS += \
 
 OBJS += \
 ./Core/Src/SPI_Connection.o \
+./Core/Src/exp_measurement.o \
+./Core/Src/exp_protocol.o \
 ./Core/Src/main.o \
 ./Core/Src/protocol_parser.o \
 ./Core/Src/sensor_utils.o \
@@ -28,6 +32,8 @@ OBJS += \
 
 C_DEPS += \
 ./Core/Src/SPI_Connection.d \
+./Core/Src/exp_measurement.d \
+./Core/Src/exp_protocol.d \
 ./Core/Src/main.d \
 ./Core/Src/protocol_parser.d \
 ./Core/Src/sensor_utils.d \
@@ -45,7 +51,7 @@ Core/Src/%.o Core/Src/%.su Core/Src/%.cyclo: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/SPI_Connection.cyclo ./Core/Src/SPI_Connection.d ./Core/Src/SPI_Connection.o ./Core/Src/SPI_Connection.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/protocol_parser.cyclo ./Core/Src/protocol_parser.d ./Core/Src/protocol_parser.o ./Core/Src/protocol_parser.su ./Core/Src/sensor_utils.cyclo ./Core/Src/sensor_utils.d ./Core/Src/sensor_utils.o ./Core/Src/sensor_utils.su ./Core/Src/stm32f1xx_hal_msp.cyclo ./Core/Src/stm32f1xx_hal_msp.d ./Core/Src/stm32f1xx_hal_msp.o ./Core/Src/stm32f1xx_hal_msp.su ./Core/Src/stm32f1xx_it.cyclo ./Core/Src/stm32f1xx_it.d ./Core/Src/stm32f1xx_it.o ./Core/Src/stm32f1xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32f1xx.cyclo ./Core/Src/system_stm32f1xx.d ./Core/Src/system_stm32f1xx.o ./Core/Src/system_stm32f1xx.su
+	-$(RM) ./Core/Src/SPI_Connection.cyclo ./Core/Src/SPI_Connection.d ./Core/Src/SPI_Connection.o ./Core/Src/SPI_Connection.su ./Core/Src/exp_measurement.cyclo ./Core/Src/exp_measurement.d ./Core/Src/exp_measurement.o ./Core/Src/exp_measurement.su ./Core/Src/exp_protocol.cyclo ./Core/Src/exp_protocol.d ./Core/Src/exp_protocol.o ./Core/Src/exp_protocol.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/protocol_parser.cyclo ./Core/Src/protocol_parser.d ./Core/Src/protocol_parser.o ./Core/Src/protocol_parser.su ./Core/Src/sensor_utils.cyclo ./Core/Src/sensor_utils.d ./Core/Src/sensor_utils.o ./Core/Src/sensor_utils.su ./Core/Src/stm32f1xx_hal_msp.cyclo ./Core/Src/stm32f1xx_hal_msp.d ./Core/Src/stm32f1xx_hal_msp.o ./Core/Src/stm32f1xx_hal_msp.su ./Core/Src/stm32f1xx_it.cyclo ./Core/Src/stm32f1xx_it.d ./Core/Src/stm32f1xx_it.o ./Core/Src/stm32f1xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32f1xx.cyclo ./Core/Src/system_stm32f1xx.d ./Core/Src/system_stm32f1xx.o ./Core/Src/system_stm32f1xx.su
 
 .PHONY: clean-Core-2f-Src
 

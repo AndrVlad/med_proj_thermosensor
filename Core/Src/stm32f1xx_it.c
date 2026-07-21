@@ -58,6 +58,8 @@ volatile uint16_t ADC_data = 0;
 /* External variables --------------------------------------------------------*/
 extern ADC_HandleTypeDef hadc1;
 extern SPI_HandleTypeDef hspi2;
+extern TIM_HandleTypeDef htim1;
+extern UART_HandleTypeDef huart1;
 /* USER CODE BEGIN EV */
 extern char res_buf[256];
 extern volatile char new_conv;
@@ -209,18 +211,35 @@ void ADC1_2_IRQHandler(void)
 {
   /* USER CODE BEGIN ADC1_2_IRQn 0 */
   ADC_data = HAL_ADC_GetValue(&hadc1);
+  need_to_send = true;
+  ADC_data_safe = ADC_data;
+  /*
   if (need_save)
   {
 	new_conv = 1; //set flag for new conversion
   }
   if (!need_selfcheck) {
 	  ADC_data_safe = ADC_data;
-  }
+  } */
   /* USER CODE END ADC1_2_IRQn 0 */
   HAL_ADC_IRQHandler(&hadc1);
   /* USER CODE BEGIN ADC1_2_IRQn 1 */
 
   /* USER CODE END ADC1_2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM1 update interrupt.
+  */
+void TIM1_UP_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_UP_IRQn 0 */
+	//__HAL_TIM_SET_COUNTER(&htim1,0);
+  /* USER CODE END TIM1_UP_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim1);
+  /* USER CODE BEGIN TIM1_UP_IRQn 1 */
+
+  /* USER CODE END TIM1_UP_IRQn 1 */
 }
 
 /**
@@ -235,6 +254,20 @@ void SPI2_IRQHandler(void)
   /* USER CODE BEGIN SPI2_IRQn 1 */
 
   /* USER CODE END SPI2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART1 global interrupt.
+  */
+void USART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART1_IRQn 0 */
+
+  /* USER CODE END USART1_IRQn 0 */
+  HAL_UART_IRQHandler(&huart1);
+  /* USER CODE BEGIN USART1_IRQn 1 */
+
+  /* USER CODE END USART1_IRQn 1 */
 }
 
 /**
