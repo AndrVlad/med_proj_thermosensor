@@ -13,6 +13,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define TEST_VERSION 1
+
 volatile uint16_t ADC_data_safe;
 bool need_selfcheck = 0;
 

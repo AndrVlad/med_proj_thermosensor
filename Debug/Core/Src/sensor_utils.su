@@ -1,5 +1,5 @@
-../Core/Src/sensor_utils.c:22:7:getTempVal	40	static
-../Core/Src/sensor_utils.c:43:6:sensorSelfCheck	8	static
-../Core/Src/sensor_utils.c:67:6:resetSensor	8	static
-../Core/Src/sensor_utils.c:91:6:startMeasurement	4	static
-../Core/Src/sensor_utils.c:97:6:stopMeasurement	4	static
+../Core/Src/sensor_utils.c:24:7:getTempVal	40	static
+../Core/Src/sensor_utils.c:45:6:sensorSelfCheck	4	static
+../Core/Src/sensor_utils.c:69:6:resetSensor	8	static
+../Core/Src/sensor_utils.c:93:6:startMeasurement	4	static
+../Core/Src/sensor_utils.c:99:6:stopMeasurement	4	static
