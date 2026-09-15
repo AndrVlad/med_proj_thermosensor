@@ -15,6 +15,7 @@
 #include "stm32f1xx_hal.h"
 
 #define LIMIT_FLASH_PAGE_NUM 65536
+//#define TEST_VER 1
 
 extern UART_HandleTypeDef huart1;
 
@@ -92,6 +93,7 @@ void updateSavedResponse(uint8_t* response);
 void fillDataField();
 void sendInitCTRL();
 void sendRxCompleteCTRL();
+void sendDebugAnswer();
 /* реализация функций */
 
 /* Вычисляет количество готовых байт данных измерения в пределах одной страницы флеш-памяти
@@ -163,7 +165,8 @@ void fillDataFrame() {
 
 	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
 	response_ready = true;
-	HAL_UART_Transmit(&huart1,response,264,1000);
+
+	sendDebugAnswer();
 };
 
 void fillDataField() {
@@ -252,8 +255,8 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 	response_ready = true;
 
 	char str[30];
-	sprintf(str,"ANS: %X %X %X tail:%X %X  \r\n",response[0],response[1],response[2],response[258], response[259]);
-	HAL_UART_Transmit(&huart1,(uint8_t*)str,20,1000);
+	sprintf(str,"RESPONSE: %02X %02X %02X %02X\r\n",response[0],response[1],response[2], response [3]);
+	HAL_UART_Transmit(&huart1,(uint8_t*)str,23,1000);
 };
 /* Подготавливает к отправке предыдущий кадр ответа */
 void sendPreviousResponse() {
@@ -306,10 +309,9 @@ void parserFSM() {
 		return;
 	}
 #endif
-
-	sprintf(str2,"CMD: %X\r\n",safe_command_frame[2]);
-	HAL_UART_Transmit(&huart1,(uint8_t*)str2,8,1000);
-	sprintf(str2,". \r\n");
+	char str2[30];
+	sprintf(str2,"GET CMD: %X\r\n",safe_command_frame[2]);
+	HAL_UART_Transmit(&huart1,(uint8_t*)str2,13,1000);
 
 	switch(FSM_state) {
 		case CONNECTED_STATE:
@@ -527,5 +529,18 @@ void resetFSMProtocol() {
 	read.page_offset_read = -1;
 	read.num_ready_bytes = 0;
 	response_ready = 0;
+}
+
+void sendDebugAnswer() {
+	char str[30 + FRAME_LEN * 3];
+	int offset = sprintf(str, "DATA RESPONSE: ");
+
+	for (int i = 0; i < FRAME_LEN; i++) {
+	    offset += sprintf(str + offset, "%02X ", response[i]);
+	}
+
+	offset += sprintf(str + offset, "\r\n");
+	HAL_UART_Transmit(&huart1, (uint8_t*)str, offset, 1000);
+
 }
 
