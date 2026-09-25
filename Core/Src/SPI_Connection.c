@@ -29,6 +29,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     // Мастер опустил CS
 	if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_RESET) {
 
+		hspi2.Instance->CR1 &= ~SPI_CR1_SSI;
+
 		// восстановление нормальной работы вывода MISO
     	GPIO_InitTypeDef GPIO_InitStruct = {0};
         GPIO_InitStruct.Pin = GPIO_PIN_14;
@@ -47,7 +49,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		// Запускаем прием/передачу
 		HAL_SPI_TransmitReceive_IT(&hspi2, spi_tx_ptr, spi_rx_ptr, FRAME_LEN);
     } else {
-
+    	hspi2.Instance->CR1 |= SPI_CR1_SSI;
        	// сброс MISO в HiZ
 		GPIO_InitTypeDef GPIO_InitStruct = {0};
 		GPIO_InitStruct.Pin = GPIO_PIN_14;
@@ -66,6 +68,7 @@ void initSPIConnection() {
 	switchBuffer(spi_state);
 	fillBuffer(dummy_frame, 0xAA);
 	initResponseBuffer();
+	hspi2.Instance->CR1 |= SPI_CR1_SSI;
 };
 
 void resetSPIConnection() {
