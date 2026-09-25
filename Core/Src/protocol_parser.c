@@ -165,8 +165,9 @@ void fillDataFrame() {
 
 	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
 	response_ready = true;
-
+#ifdef DEBUG_ON
 	sendDebugAnswer();
+#endif
 };
 
 void fillDataField() {
@@ -253,8 +254,9 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 
 	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
 	response_ready = true;
-
+#ifdef DEBUG_ON
 	sendDebugAnswer();
+#endif
 };
 /* Подготавливает к отправке предыдущий кадр ответа */
 void sendPreviousResponse() {
@@ -267,8 +269,9 @@ void sendPreviousResponse() {
 
 	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
 	response_ready = true;
-
+#ifdef DEBUG_ON
 	sendDebugAnswer();
+#endif
 	return;
 };
 
@@ -309,9 +312,12 @@ void parserFSM() {
 		return;
 	}
 #endif
+#ifdef DEBUG_ON
 	char str2[30];
 	sprintf(str2,"GET CMD: %X\r\n",safe_command_frame[2]);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str2,13,1000);
+#endif
+
 
 	switch(FSM_state) {
 		case CONNECTED_STATE:
