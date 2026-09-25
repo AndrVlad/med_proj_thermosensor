@@ -2,8 +2,8 @@
 ../Core/Src/protocol_parser.c:136:6:setFSMProtocolState	16	static
 ../Core/Src/protocol_parser.c:141:6:fillDataFrame	16	static
 ../Core/Src/protocol_parser.c:172:6:fillDataField	16	static
-../Core/Src/protocol_parser.c:220:6:fillResponseFrame	72	static
-../Core/Src/protocol_parser.c:262:6:sendPreviousResponse	8	static
+../Core/Src/protocol_parser.c:220:6:fillResponseFrame	24	static
+../Core/Src/protocol_parser.c:260:6:sendPreviousResponse	8	static
 ../Core/Src/protocol_parser.c:275:6:updateSavedResponse	24	static
 ../Core/Src/protocol_parser.c:299:6:parserFSM	48	static
 ../Core/Src/protocol_parser.c:474:6:checkCRC32	24	static

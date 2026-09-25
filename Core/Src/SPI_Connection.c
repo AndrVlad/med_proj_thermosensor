@@ -32,12 +32,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		hspi2.Instance->CR1 &= ~SPI_CR1_SSI;
 
 		// восстановление нормальной работы вывода MISO
+		/*
     	GPIO_InitTypeDef GPIO_InitStruct = {0};
         GPIO_InitStruct.Pin = GPIO_PIN_14;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         GPIO_InitStruct.Speed =  GPIO_SPEED_FREQ_HIGH;
-        HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+        HAL_GPIO_Init(GPIOB, &GPIO_InitStruct); */
 
 		// проверка на наличие готового ответа для отправки
 		if(response_ready && spi_state == SPI_MODE_TX) { 	// если ответ готов и датчик в режиме передатчика
@@ -51,10 +52,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     } else {
     	hspi2.Instance->CR1 |= SPI_CR1_SSI;
        	// сброс MISO в HiZ
-		GPIO_InitTypeDef GPIO_InitStruct = {0};
+		/*GPIO_InitTypeDef GPIO_InitStruct = {0};
 		GPIO_InitStruct.Pin = GPIO_PIN_14;
 		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct); */
     }
 }
 

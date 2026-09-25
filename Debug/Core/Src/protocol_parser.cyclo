@@ -3,7 +3,7 @@ protocol_parser.c:136:6:setFSMProtocolState	1
 protocol_parser.c:141:6:fillDataFrame	1
 protocol_parser.c:172:6:fillDataField	7
 protocol_parser.c:220:6:fillResponseFrame	2
-protocol_parser.c:262:6:sendPreviousResponse	1
+protocol_parser.c:260:6:sendPreviousResponse	1
 protocol_parser.c:275:6:updateSavedResponse	3
 protocol_parser.c:299:6:parserFSM	48
 protocol_parser.c:474:6:checkCRC32	2

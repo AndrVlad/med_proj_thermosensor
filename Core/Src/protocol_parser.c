@@ -254,9 +254,7 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
 	response_ready = true;
 
-	char str[30];
-	sprintf(str,"RESPONSE: %02X %02X %02X %02X\r\n",response[0],response[1],response[2], response [3]);
-	HAL_UART_Transmit(&huart1,(uint8_t*)str,23,1000);
+	sendDebugAnswer();
 };
 /* Подготавливает к отправке предыдущий кадр ответа */
 void sendPreviousResponse() {
@@ -269,6 +267,8 @@ void sendPreviousResponse() {
 
 	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
 	response_ready = true;
+
+	sendDebugAnswer();
 	return;
 };
 
