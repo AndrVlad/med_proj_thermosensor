@@ -13,7 +13,7 @@
 #include <string.h>
 
 /* Раскомментировать для выполнения отладки */
-//#define DEBUG_ON 1
+#define DEBUG_ON 1
 
 /* Идентификатор датчика */
 #define SENSOR_ID 			0x2C

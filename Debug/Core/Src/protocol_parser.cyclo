@@ -6,10 +6,10 @@ protocol_parser.c:221:6:fillResponseFrame	2
 protocol_parser.c:262:6:sendPreviousResponse	1
 protocol_parser.c:278:6:updateSavedResponse	3
 protocol_parser.c:302:6:parserFSM	48
-protocol_parser.c:480:6:checkCRC32	2
-protocol_parser.c:497:10:calculateCRC32	2
-protocol_parser.c:505:6:sensorInit	1
-protocol_parser.c:521:6:sendInitCTRL	1
-protocol_parser.c:526:6:sendRxCompleteCTRL	1
-protocol_parser.c:532:6:resetFSMProtocol	1
-protocol_parser.c:540:6:sendDebugAnswer	2
+protocol_parser.c:481:6:checkCRC32	2
+protocol_parser.c:498:10:calculateCRC32	2
+protocol_parser.c:506:6:sensorInit	1
+protocol_parser.c:522:6:sendInitCTRL	1
+protocol_parser.c:527:6:sendRxCompleteCTRL	1
+protocol_parser.c:533:6:resetFSMProtocol	1
+protocol_parser.c:541:6:sendDebugAnswer	2

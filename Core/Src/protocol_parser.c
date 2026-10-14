@@ -166,7 +166,7 @@ void fillDataFrame() {
 	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
 	response_ready = true;
 #ifdef DEBUG_ON
-	sendDebugAnswer();
+	sendDebugAnswer("RESPONSE");
 #endif
 };
 
@@ -255,7 +255,7 @@ void fillResponseFrame(uint16_t response_code, uint16_t command_code) {
 	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
 	response_ready = true;
 #ifdef DEBUG_ON
-	sendDebugAnswer();
+	sendDebugAnswer("RESPONSE");
 #endif
 };
 /* Подготавливает к отправке предыдущий кадр ответа */
@@ -270,7 +270,7 @@ void sendPreviousResponse() {
 	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
 	response_ready = true;
 #ifdef DEBUG_ON
-	sendDebugAnswer();
+	sendDebugAnswer("PREV_RESP");
 #endif
 	return;
 };
@@ -316,6 +316,7 @@ void parserFSM() {
 	char str2[30];
 	sprintf(str2,"GET CMD: %X\r\n",safe_command_frame[2]);
 	HAL_UART_Transmit(&huart1,(uint8_t*)str2,13,1000);
+	sendDebugAnswer("CMD");
 #endif
 
 
@@ -537,9 +538,9 @@ void resetFSMProtocol() {
 	response_ready = 0;
 }
 
-void sendDebugAnswer() {
+void sendDebugAnswer(const char *type) {
 	char str[30 + FRAME_LEN * 3];
-	int offset = sprintf(str, "DATA RESPONSE: ");
+	int offset = sprintf(str, "[%s]: ", type);
 
 	for (int i = 0; i < FRAME_LEN; i++) {
 	    offset += sprintf(str + offset, "%02X ", response[i]);
