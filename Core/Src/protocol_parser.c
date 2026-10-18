@@ -94,6 +94,7 @@ void fillDataField();
 void sendInitCTRL();
 void sendRxCompleteCTRL();
 void sendDebugAnswer();
+void sendDebugRequest(const char *type);
 /* реализация функций */
 
 /* Вычисляет количество готовых байт данных измерения в пределах одной страницы флеш-памяти
@@ -166,7 +167,7 @@ void fillDataFrame() {
 	// сигнализируем модулю приема/передачи SPI о том, что ответ готов
 	response_ready = true;
 #ifdef DEBUG_ON
-	sendDebugAnswer("RESPONSE");
+	sendDebugAnswer("DATA");
 #endif
 };
 
@@ -313,10 +314,12 @@ void parserFSM() {
 	}
 #endif
 #ifdef DEBUG_ON
-	char str2[30];
-	sprintf(str2,"GET CMD: %X\r\n",safe_command_frame[2]);
-	HAL_UART_Transmit(&huart1,(uint8_t*)str2,13,1000);
-	sendDebugAnswer("CMD");
+	char str2[42];
+	sprintf(str2,"GET CMD: %X %X %X [0] %X %X %X %X %X %X \r\n",safe_command_frame[0],safe_command_frame[1], safe_command_frame[2],
+			safe_command_frame[258],safe_command_frame[259], safe_command_frame[260], safe_command_frame[261],
+			safe_command_frame[262], safe_command_frame[263]);
+	HAL_UART_Transmit(&huart1,(uint8_t*)str2,41,1000);
+	//sendDebugRequest("CMD");
 #endif
 
 
@@ -550,4 +553,19 @@ void sendDebugAnswer(const char *type) {
 	HAL_UART_Transmit(&huart1, (uint8_t*)str, offset, 1000);
 
 }
+
+void sendDebugRequest(const char *type) {
+	char str[30 + FRAME_LEN * 3];
+	int offset = sprintf(str, "[%s]: ", type);
+
+	for (int i = 0; i < 3; i++) {
+	    offset += sprintf(str + offset, "%02X ", safe_command_frame[i]);
+	}
+
+	offset += sprintf(str + offset, "\r\n");
+	HAL_UART_Transmit(&huart1, (uint8_t*)str, offset, 1000);
+
+}
+
+
 
